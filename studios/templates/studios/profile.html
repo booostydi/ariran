@@ -222,13 +222,104 @@ body { background: #f2f3f7 !important; }
 .favorite-btn.is-favorite svg { stroke: #ff4757; fill: #ff4757; }
 .favorite-btn:active { transform: scale(0.95); }
 
-@media (max-width: 1200px) { .booking-body { grid-template-columns: 1fr 1fr; } }
+/* ===== HISTORY BOOKING (история бронирований) ===== */
+
+/* В истории используется другая верстка: booking-body + booking-photos + studio-info-card + rental-date-block + price-block */
+.booking-body {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.booking-photos {
+    flex-shrink: 0;
+}
+
+.booking-main-photo {
+    width: 260px;
+    height: 175px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f0f1f5;
+}
+
+.booking-main-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.studio-info-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-top: 4px;
+}
+
+/* rental-date-block и price-block — единый стиль, как в активных */
+.rental-date-block,
+.price-block {
+    flex-shrink: 0;
+    min-width: 200px;
+    text-align: right;
+}
+
+.rental-date-block .label,
+.price-block .label {
+    font-size: 12px;
+    color: #aaa;
+    margin-bottom: 4px;
+}
+
+.rental-date-block .date {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.rental-date-block .time {
+    font-size: 13px;
+    color: #666;
+    margin-top: 2px;
+}
+
+.price-block .price {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+/* Причина отказа подгоняем под визуальные стандарты карточки */
+.booking-rejection-reason {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: #f8d7da;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #721c24;
+}
+
+/* Мелкие выравнивания заголовка статуса в истории */
+.booking-status.rejected {
+    align-self: flex-start;
+}
+
+@media (max-width: 1200px) {
+    .booking-body { flex-direction: column; }
+    .rental-date-block,
+    .price-block { min-width: 0; text-align: left; }
+}
+
 @media (max-width: 1024px) {
     .profile-page { padding: 20px 24px 60px; }
     .profile-header { flex-direction: column; text-align: center; padding: 32px 24px; }
     .profile-stats { justify-content: center; }
     .profile-content { grid-template-columns: 1fr; }
-    .booking-body { grid-template-columns: 1fr; }
+    .booking-body { flex-direction: column; }
+    .rental-date-block,
+    .price-block { min-width: 0; text-align: left; }
 }
 </style>
 {% endblock %}
@@ -384,8 +475,8 @@ body { background: #f2f3f7 !important; }
                                 <div class="price">{{ booking.total_price }} ₽</div>
                             </div>
                         </div>
-                        {% if booking.rejection_reason %}
-                        <div style="margin-top: 16px; padding: 12px 16px; background: #f8d7da; border-radius: 8px; font-size: 14px; color: #721c24;"><strong>Причина:</strong> {{ booking.rejection_reason }}</div>
+{% if booking.rejection_reason %}
+                        <div class="booking-rejection-reason"><strong>Причина:</strong> {{ booking.rejection_reason }}</div>
                         {% endif %}
                     </div>
                     {% empty %}
