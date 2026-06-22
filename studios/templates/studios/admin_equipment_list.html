@@ -1,0 +1,81 @@
+{% extends 'studios/base.html' %}
+{% load static %}
+{% block title %}Оборудование — АРИРАН{% endblock %}
+{% block extra_styles %}
+<style>
+body { background: #f2f3f7 !important; }
+.footer { background: #f2f3f7 !important; }
+.footer-top, .footer-middle, .footer-bottom { border-color: rgba(0,0,0,0.1) !important; }
+.footer-logo, .footer-nav a, .footer-contacts .phone, .footer-contacts .email,
+.footer-contacts .address, .footer-schedule, .footer-schedule .time,
+.footer-copy, .footer-legal a { color: #1a1a1a !important; }
+
+.adm-page { max-width: 1744px; margin: 0 auto; padding: 120px 88px 60px; }
+.adm-topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.adm-topbar h1 { font-size: 24px; font-weight: 700; color: #1a1a1a; }
+.btn-add { padding: 10px 24px; background: #788BFF; color: #fff; border: none; border-radius: 50px; font-size: 14px; font-weight: 600; text-decoration: none; transition: background 0.2s; }
+.btn-add:hover { background: #5a6fd6; color: #fff; }
+.btn-back-panel { padding: 10px 24px; background: #f0f1f5; color: #666; border: none; border-radius: 50px; font-size: 14px; font-weight: 600; text-decoration: none; }
+.btn-back-panel:hover { background: #e0e1e5; }
+.adm-card { background: #fff; border-radius: 16px; padding: 24px 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.adm-table { width: 100%; border-collapse: collapse; }
+.adm-table th { font-size: 12px; font-weight: 600; color: #aaa; text-transform: uppercase; padding: 0 16px 12px; text-align: left; border-bottom: 1px solid #f0f1f5; }
+.adm-table td { padding: 14px 16px; font-size: 14px; color: #333; border-bottom: 1px solid #f7f8fc; vertical-align: middle; }
+.adm-table tr:last-child td { border-bottom: none; }
+.adm-table tr:hover td { background: #fafbff; }
+.action-btns { display: flex; gap: 8px; }
+.btn-action { padding: 6px 14px; border: none; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; transition: all 0.2s; font-family: Helvetica, Arial, sans-serif; }
+.btn-edit { background: #e8eaf6; color: #3a4a9f; }
+.btn-edit:hover { background: #dde0f5; }
+.btn-delete { background: #f8d7da; color: #721c24; }
+.btn-delete:hover { background: #f5c6cb; }
+.badge-yes { background: #d4edda; color: #155724; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.badge-no  { background: #f8d7da; color: #721c24; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+.empty-state { text-align: center; padding: 40px; color: #aaa; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="adm-page">
+    <div class="adm-topbar">
+        <h1>Оборудование</h1>
+        <div style="display:flex;gap:12px;">
+            <a href="/admin-panel/" class="btn-back-panel">← Панель</a>
+            <a href="{% url 'studios:admin_equipment_add' %}" class="btn-add">+ Добавить</a>
+        </div>
+    </div>
+    <div class="adm-card">
+        {% if items %}
+        <table class="adm-table">
+            <thead>
+                <tr>
+                    <th>Название</th>
+                    <th>Категория</th>
+                    <th>Студия</th>
+                    <th>Доступно</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td><strong>{{ item.name }}</strong></td>
+                    <td>{{ item.category.name|default:"—" }}</td>
+                    <td>{{ item.studio.name|default:"—" }}</td>
+                    <td><span class="{% if item.is_available %}badge-yes{% else %}badge-no{% endif %}">{% if item.is_available %}Да{% else %}Нет{% endif %}</span></td>
+                    <td>
+                        <div class="action-btns">
+                            <a href="{% url 'studios:admin_equipment_edit' item.pk %}" class="btn-action btn-edit">Редактировать</a>
+                            <a href="{% url 'studios:admin_equipment_delete' item.pk %}" class="btn-action btn-delete" onclick="return confirm('Удалить?')">Удалить</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">Оборудования нет</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

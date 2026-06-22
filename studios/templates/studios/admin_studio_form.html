@@ -1,0 +1,156 @@
+{% extends 'studios/base.html' %}
+{% load static %}
+{% block title %}{{ title }} — АРИРАН{% endblock %}
+{% block extra_styles %}
+<style>
+body { background: #f2f3f7 !important; }
+.footer { background: #f2f3f7 !important; }
+.footer-top, .footer-middle, .footer-bottom { border-color: rgba(0,0,0,0.1) !important; }
+.footer-logo, .footer-nav a, .footer-contacts .phone, .footer-contacts .email,
+.footer-contacts .address, .footer-schedule, .footer-schedule .time,
+.footer-copy, .footer-legal a { color: #1a1a1a !important; }
+
+.adm-page { max-width: 1744px; margin: 0 auto; padding: 120px 88px 60px; }
+.adm-card { background: #fff; border-radius: 16px; padding: 32px 40px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.adm-card-title { font-size: 22px; font-weight: 700; color: #1a1a1a; margin-bottom: 28px; }
+
+.adm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.adm-field { display: flex; flex-direction: column; gap: 6px; }
+.adm-field.full { grid-column: 1 / -1; }
+.adm-label { font-size: 13px; font-weight: 600; color: #888; }
+.adm-input, .adm-select, .adm-textarea {
+    padding: 12px 16px; border: 1px solid #e0e0e0; border-radius: 10px;
+    font-family: Helvetica, Arial, sans-serif; font-size: 14px; color: #1a1a1a;
+    outline: none; transition: border-color 0.2s; background: #fafbff;
+}
+.adm-input:focus, .adm-select:focus, .adm-textarea:focus { border-color: #788BFF; }
+.adm-textarea { resize: vertical; }
+.adm-checkbox { width: 18px; height: 18px; accent-color: #788BFF; margin-top: 4px; }
+
+.adm-section { margin-top: 28px; }
+.adm-section-title { font-size: 15px; font-weight: 700; color: #1a1a1a; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #f0f1f5; }
+
+.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.photo-item { position: relative; aspect-ratio: 4/3; border-radius: 10px; overflow: hidden; background: #f0f1f5; }
+.photo-item img { width: 100%; height: 100%; object-fit: cover; }
+.photo-delete { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; background: rgba(220,53,69,0.85); border: none; border-radius: 50%; color: #fff; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
+
+.adm-file-label { display: inline-block; padding: 10px 20px; background: #f0f1f5; border-radius: 10px; font-size: 14px; color: #555; cursor: pointer; transition: background 0.2s; }
+.adm-file-label:hover { background: #e0e1e5; }
+.adm-file-input { display: none; }
+
+.adm-actions { display: flex; gap: 12px; margin-top: 32px; }
+.btn-save { padding: 12px 32px; background: #788BFF; color: #fff; border: none; border-radius: 50px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: Helvetica, Arial, sans-serif; transition: background 0.2s; }
+.btn-save:hover { background: #5a6fd6; }
+.btn-back { padding: 12px 32px; background: #f0f1f5; color: #666; border: none; border-radius: 50px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: Helvetica, Arial, sans-serif; text-decoration: none; transition: background 0.2s; }
+.btn-back:hover { background: #e0e1e5; }
+
+.error-text { font-size: 12px; color: #dc3545; margin-top: 2px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="adm-page">
+    <div class="adm-card">
+        <div class="adm-card-title">{{ title }}</div>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="adm-grid">
+                <div class="adm-field full">
+                    <label class="adm-label">Название</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}<div class="error-text">{{ form.name.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="adm-field">
+                    <label class="adm-label">Категория</label>
+                    {{ form.category }}
+                </div>
+                <div class="adm-field">
+                    <label class="adm-label">Интерьер</label>
+                    {{ form.interior }}
+                </div>
+                <div class="adm-field full">
+                    <label class="adm-label">Описание</label>
+                    {{ form.description }}
+                </div>
+                <div class="adm-field">
+                    <label class="adm-label">Цена за час (₽)</label>
+                    {{ form.price_per_hour }}
+                </div>
+                <div class="adm-field">
+                    <label class="adm-label">Площадь (м²)</label>
+                    {{ form.area }}
+                </div>
+                <div class="adm-field">
+                    <label class="adm-label">Высота потолков (м)</label>
+                    {{ form.ceiling_height }}
+                </div>
+                <div class="adm-field">
+                    <label class="adm-label">Доступна</label>
+                    {{ form.is_available }}
+                </div>
+            </div>
+
+            <!-- Фото -->
+            <div class="adm-section">
+                <div class="adm-section-title">Фотографии</div>
+                {% if photos %}
+                <div class="photo-grid">
+                    {% for photo in photos %}
+                    <div class="photo-item">
+                        <img src="{{ photo.image.url }}" alt="Фото">
+                        <button type="button" class="photo-delete" onclick="markDelete(this, {{ photo.id }})">×</button>
+                        <input type="hidden" name="delete_photos" value="{{ photo.id }}" disabled id="del_{{ photo.id }}">
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <label class="adm-file-label">
+                    + Добавить фото
+                    <input type="file" name="photos" multiple accept="image/*" class="adm-file-input" id="photoInput">
+                </label>
+                <div id="photoPreview" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;"></div>
+            </div>
+
+            <div class="adm-actions">
+                <button type="submit" class="btn-save">Сохранить</button>
+                <a href="/admin-panel/?tab=studios" class="btn-back">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function markDelete(btn, photoId) {
+    const input = document.getElementById('del_' + photoId);
+    input.disabled = false;
+    btn.closest('.photo-item').style.opacity = '0.3';
+    btn.textContent = '↩';
+    btn.onclick = function() { unmarkDelete(this, photoId); };
+}
+function unmarkDelete(btn, photoId) {
+    const input = document.getElementById('del_' + photoId);
+    input.disabled = true;
+    btn.closest('.photo-item').style.opacity = '1';
+    btn.textContent = '×';
+    btn.onclick = function() { markDelete(this, photoId); };
+}
+
+document.getElementById('photoInput').addEventListener('change', function() {
+    const preview = document.getElementById('photoPreview');
+    preview.innerHTML = '';
+    Array.from(this.files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const div = document.createElement('div');
+            div.style.cssText = 'width:100px;height:75px;border-radius:8px;overflow:hidden;';
+            div.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
+            preview.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+    });
+});
+</script>
+{% endblock %}

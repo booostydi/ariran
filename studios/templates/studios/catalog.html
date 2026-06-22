@@ -1,0 +1,456 @@
+{% extends 'studios/base.html' %}
+{% load static %}
+
+{% block title %}Каталог студий — АРИРАН{% endblock %}
+
+{% block content %}
+<div class="catalog-page">
+    <div class="catalog-container">
+        <!-- ===== SIDEBAR ===== -->
+        <aside class="sidebar">
+            <form method="get" id="filterForm">
+                <input type="hidden" name="sort" id="sortHidden" value="{{ sort }}">
+
+                <!-- Категория -->
+                <div class="filter-group">
+                    <div class="filter-label">Категория</div>
+                    <div class="filter-select-wrapper">
+                        <select name="category" class="filter-select">
+                            <option value="">Выберите категорию</option>
+                            {% for cat in categories %}
+                                <option value="{{ cat.id }}" {% if selected_category == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Интерьер -->
+                <div class="filter-group">
+                    <div class="filter-label">Интерьер</div>
+                    <div class="filter-select-wrapper">
+                        <select name="interior" class="filter-select">
+                            <option value="">Выберите интерьер</option>
+                            {% for int in interiors %}
+                                <option value="{{ int.id }}" {% if selected_interior == int.id|stringformat:"s" %}selected{% endif %}>{{ int.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Категория оборудования -->
+                <div class="filter-group">
+                    <div class="filter-label">Категория оборудования</div>
+                    <div class="filter-select-wrapper">
+                        <select name="equipment_category" class="filter-select">
+                            <option value="">Все категории</option>
+                            {% for cat in equipment_categories %}
+                                <option value="{{ cat.id }}" {% if selected_equipment_category == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Цена за час -->
+                <div class="filter-group">
+                    <div class="filter-label">Цена за час</div>
+                    <div class="filter-select-wrapper">
+                        <select name="price_range" class="filter-select">
+                            <option value="">Выберите цену</option>
+                            <option value="0-1500" {% if request.GET.price_range == "0-1500" %}selected{% endif %}>до 1500₽</option>
+                            <option value="1500-2500" {% if request.GET.price_range == "1500-2500" %}selected{% endif %}>1500 — 2500₽</option>
+                            <option value="2500-5000" {% if request.GET.price_range == "2500-5000" %}selected{% endif %}>2500 — 5000₽</option>
+                            <option value="5000+" {% if request.GET.price_range == "5000+" %}selected{% endif %}>от 5000₽</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Дата — кастомный календарь -->
+                <div class="filter-group">
+                    <div class="filter-label">Дата</div>
+                    <input type="hidden" name="date" id="selectedDate" value="{{ filter_date }}">
+                    <div class="date-picker-trigger" id="dateTrigger">
+                        <span id="dateDisplay">{% if filter_date %}{{ filter_date }}{% else %}Выберите дату{% endif %}</span>
+                        <span class="date-arrow">⌄</span>
+                    </div>
+                    <div class="calendar-popup" id="calendarPopup">
+                        <div class="calendar-header">
+                            <button type="button" class="cal-nav" id="calPrev">‹</button>
+                            <span class="calendar-month-label" id="calMonthLabel"></span>
+                            <button type="button" class="cal-nav" id="calNext">›</button>
+                        </div>
+                        <div class="calendar-grid" id="calGrid"></div>
+                        <button type="button" class="cal-clear" id="calClear">Сбросить дату</button>
+                    </div>
+                </div>
+
+                <!-- Время — чекбоксы -->
+                <div class="filter-group">
+                    <div class="filter-label">Время</div>
+                    <input type="hidden" name="times" id="selectedTimes" value="{{ filter_times }}">
+                    <div class="time-checkboxes-wrapper" id="timeSlotsArea">
+                        <div class="time-no-date">Сначала выберите дату</div>
+                    </div>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn-apply">Применить</button>
+                    <button type="button" class="btn-reset" id="btnReset">Сбросить</button>
+                </div>
+            </form>
+        </aside>
+
+        <!-- ===== MAIN CONTENT ===== -->
+        <main class="catalog-main">
+            <div class="catalog-topbar">
+                <div class="catalog-count">Найдено: <strong>{{ studios|length }} студии</strong></div>
+                <div class="sort-wrapper">
+                    Сортировать по:
+                    <select class="sort-select" id="sortSelect">
+                        <option value="name" {% if sort == 'name' %}selected{% endif %}>названию</option>
+                        <option value="-name" {% if sort == '-name' %}selected{% endif %}>названию ↓</option>
+                        <option value="price" {% if sort == 'price' %}selected{% endif %}>цене ↑</option>
+                        <option value="-price" {% if sort == '-price' %}selected{% endif %}>цене ↓</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="studios-grid" id="studiosGrid">
+                {% for studio in studios %}
+                <div class="studio-card">
+                    <div class="card-image-wrapper">
+                        {% if studio.photos.first %}
+                            <img src="{{ studio.photos.first.image.url }}" alt="{{ studio.name }}" loading="lazy">
+                        {% else %}
+                            <img src="{% static 'images/empty-image.png' %}" alt="Нет фото" loading="lazy">
+                        {% endif %}
+                        <!-- Кнопка избранного -->
+                        {% if user.is_authenticated %}
+                        <button class="favorite-btn {% if studio.id in user_favorites %}is-favorite{% endif %}" 
+                                data-studio-id="{{ studio.id }}" 
+                                onclick="toggleFavorite(event, this)" 
+                                type="button"
+                                aria-label="В избранное">
+                            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                        </button>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <div class="card-name">{{ studio.name }}</div>
+                        <div class="card-category">{{ studio.get_type_display }}</div>
+                        <div class="card-meta">
+                            <div class="card-meta-item">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <rect x="3" y="3" width="18" height="18" rx="1" stroke="#999" stroke-width="1.5"/>
+                                    <path d="M3 9h18M9 3v18" stroke="#999" stroke-width="1.5"/>
+                                </svg>
+                                {{ studio.area }} м²
+                            </div>
+                            <div class="card-meta-item">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <line x1="12" y1="3" x2="12" y2="21" stroke="#999" stroke-width="1.5"/>
+                                    <polyline points="7 8 12 3 17 8" stroke="#999" stroke-width="1.5" fill="none"/>
+                                    <polyline points="7 16 12 21 17 16" stroke="#999" stroke-width="1.5" fill="none"/>
+                                </svg>
+                                {{ studio.ceiling_height }} м
+                            </div>
+                        </div>
+                        <div class="card-divider"></div>
+                        <div class="card-price">от {{ studio.price_per_hour|floatformat:0 }} ₽</div>
+                        <a href="{% url 'studios:studio_detail' studio.pk %}" class="btn-book">Забронировать</a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="no-studios">Студии не найдены. Попробуйте изменить фильтры.</div>
+                {% endfor %}
+            </div>
+
+            {% if studios|length >= 8 %}
+            <div class="load-more-wrapper">
+                <button class="btn-load-more" id="btnLoadMore">Показать ещё</button>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            let cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+window.toggleFavorite = function(event, btn) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const studioId = btn.dataset.studioId;
+    const url = '/profile/favorite/' + studioId + '/';
+    const csrfToken = getCookie('csrftoken');
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json'
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => response.json())
+        .then(data => {
+        // визуальная индикация сразу
+        btn.classList.toggle('is-favorite', data.is_favorite);
+
+        // небольшой “ping”, чтобы было заметно даже при медленной сети
+        btn.animate([
+            { transform: 'scale(1)' },
+            { transform: 'scale(1.15)' },
+            { transform: 'scale(1)' }
+        ], { duration: 180, easing: 'ease-out' });
+    })
+
+    .catch(error => console.error('Ошибка избранного:', error));
+};
+
+// ===== FREE DATES =====
+let freeDatesSet = new Set();
+
+let allHours = ['10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'];
+let selectedTimes = new Set();
+
+fetch('/api/catalog-free-dates/')
+    .then(r => r.json())
+    .then(data => {
+        freeDatesSet = new Set(data.free_dates);
+        renderCalendar();
+    })
+    .catch(() => renderCalendar());
+
+// ===== CALENDAR =====
+let calYear, calMonth;
+const today = new Date();
+calYear = today.getFullYear();
+calMonth = today.getMonth();
+
+const MONTHS_RU = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const DAYS_RU = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+
+let selectedDateVal = '{{ filter_date|default:"" }}';
+const calendarPopup = document.getElementById('calendarPopup');
+const dateTrigger = document.getElementById('dateTrigger');
+
+function isoDate(y, m, d) {
+    return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+}
+
+function renderCalendar() {
+    const label = document.getElementById('calMonthLabel');
+    const grid = document.getElementById('calGrid');
+    label.textContent = `${MONTHS_RU[calMonth]} ${calYear}`;
+    grid.innerHTML = '';
+
+    DAYS_RU.forEach(d => {
+        const el = document.createElement('div');
+        el.className = 'cal-day-name';
+        el.textContent = d;
+        grid.appendChild(el);
+    });
+
+    const firstDay = new Date(calYear, calMonth, 1);
+    let startDow = firstDay.getDay();
+    startDow = startDow === 0 ? 6 : startDow - 1;
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    const todayStr = isoDate(today.getFullYear(), today.getMonth(), today.getDate());
+
+    for (let i = 0; i < startDow; i++) {
+        const el = document.createElement('div');
+        el.className = 'cal-day empty';
+        grid.appendChild(el);
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+        const el = document.createElement('div');
+        const ds = isoDate(calYear, calMonth, d);
+        el.className = 'cal-day';
+        el.textContent = d;
+
+        if (ds < todayStr) {
+            el.classList.add('disabled');
+        } else if (ds === todayStr) {
+            el.classList.add('today');
+        }
+
+        if (!el.classList.contains('disabled')) {
+            if (freeDatesSet.size > 0 && !freeDatesSet.has(ds)) {
+                el.classList.add('no-free');
+                el.title = 'Нет свободных студий';
+            } else {
+                el.classList.add('free-date');
+                el.addEventListener('click', () => selectDate(ds));
+            }
+        }
+
+        if (ds === selectedDateVal) el.classList.add('selected');
+        grid.appendChild(el);
+    }
+}
+
+function selectDate(ds) {
+    selectedDateVal = ds;
+    document.getElementById('selectedDate').value = ds;
+    document.getElementById('dateDisplay').textContent = ds;
+    selectedTimes.clear();
+    updateHiddenTimesInput();
+    renderCalendar();
+    loadTimeSlots(ds);
+    calendarPopup.classList.remove('active');
+    dateTrigger.classList.remove('active');
+}
+
+dateTrigger.addEventListener('click', () => {
+    const isActive = calendarPopup.classList.contains('active');
+    calendarPopup.classList.toggle('active');
+    dateTrigger.classList.toggle('active');
+});
+
+document.getElementById('calPrev').addEventListener('click', (e) => {
+    e.stopPropagation();
+    calMonth--;
+    if (calMonth < 0) { calMonth = 11; calYear--; }
+    renderCalendar();
+});
+
+document.getElementById('calNext').addEventListener('click', (e) => {
+    e.stopPropagation();
+    calMonth++;
+    if (calMonth > 11) { calMonth = 0; calYear++; }
+    renderCalendar();
+});
+
+document.getElementById('calClear').addEventListener('click', (e) => {
+    e.stopPropagation();
+    selectedDateVal = '';
+    selectedTimes.clear();
+    document.getElementById('selectedDate').value = '';
+    document.getElementById('dateDisplay').textContent = 'Выберите дату';
+    updateHiddenTimesInput();
+    renderCalendar();
+    renderTimeSlots([]);
+    calendarPopup.classList.remove('active');
+    dateTrigger.classList.remove('active');
+});
+
+document.addEventListener('click', (e) => {
+    if (!calendarPopup.contains(e.target) && !dateTrigger.contains(e.target)) {
+        calendarPopup.classList.remove('active');
+        dateTrigger.classList.remove('active');
+    }
+});
+
+// ===== TIME SLOTS WITH CHECKBOXES =====
+function loadTimeSlots(dateStr) {
+    const area = document.getElementById('timeSlotsArea');
+    area.innerHTML = '<div class="time-no-date">Загрузка...</div>';
+    fetch(`/api/catalog-free-dates/`)
+        .then(() => renderTimeSlots(allHours));
+}
+
+function renderTimeSlots(freeSlots) {
+    const area = document.getElementById('timeSlotsArea');
+    if (!selectedDateVal) {
+        area.innerHTML = '<div class="time-no-date">Сначала выберите дату</div>';
+        return;
+    }
+    
+    const grid = document.createElement('div');
+    grid.className = 'time-checkboxes-grid';
+    
+    allHours.forEach(slot => {
+        const timeSlot = document.createElement('div');
+        timeSlot.className = 'time-checkbox-item';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `time-${slot}`;
+        checkbox.value = slot;
+        
+        if (selectedTimes.has(slot)) {
+            checkbox.checked = true;
+        }
+        
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                selectedTimes.add(slot);
+            } else {
+                selectedTimes.delete(slot);
+            }
+            updateHiddenTimesInput();
+        });
+        
+        const label = document.createElement('label');
+        label.htmlFor = `time-${slot}`;
+        label.textContent = slot;
+        
+        timeSlot.appendChild(checkbox);
+        timeSlot.appendChild(label);
+        grid.appendChild(timeSlot);
+    });
+    
+    area.innerHTML = '';
+    area.appendChild(grid);
+}
+
+function updateHiddenTimesInput() {
+    document.getElementById('selectedTimes').value = Array.from(selectedTimes).join(',');
+}
+
+if (selectedDateVal) {
+    renderTimeSlots(allHours);
+}
+
+// ===== SORT =====
+document.getElementById('sortSelect').addEventListener('change', function() {
+    document.getElementById('sortHidden').value = this.value;
+    document.getElementById('filterForm').submit();
+});
+
+// ===== RESET =====
+document.getElementById('btnReset').addEventListener('click', () => {
+    window.location.href = '/catalog/';
+});
+
+// ===== LOAD MORE =====
+const grid = document.getElementById('studiosGrid');
+const cards = grid ? grid.querySelectorAll('.studio-card') : [];
+const VISIBLE_COUNT = 12;
+let shownCount = VISIBLE_COUNT;
+
+if (cards.length > VISIBLE_COUNT) {
+    cards.forEach((c, i) => { if (i >= VISIBLE_COUNT) c.style.display = 'none'; });
+    const btn = document.getElementById('btnLoadMore');
+    if (btn) {
+        btn.addEventListener('click', () => {
+            const next = shownCount + 4;
+            cards.forEach((c, i) => { if (i < next) c.style.display = ''; });
+            shownCount = next;
+            if (shownCount >= cards.length) btn.style.display = 'none';
+        });
+    }
+}
+</script>
+{% endblock %}
+

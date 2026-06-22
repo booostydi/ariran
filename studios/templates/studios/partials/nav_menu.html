@@ -1,0 +1,36 @@
+{% load static %}
+
+<nav class="nav-menu nav-menu--glass" id="mainHeader">
+
+    <div class="nav-container">
+        <div class="nav-logo">
+            <a href="{% url 'studios:index' %}">АРИРАН</a>
+        </div>
+
+        <div class="nav-menu-links" aria-label="Основная навигация">
+            <a href="{% url 'studios:index' %}" class="nav-menu-link">Главная</a>
+            <a href="{% url 'studios:catalog' %}" class="nav-menu-link">Каталог</a>
+
+            {% if user.is_authenticated %}
+                <a href="{% url 'studios:profile' %}" class="nav-menu-link">Профиль</a>
+                {% if user.role == 'admin' %}
+                    <a href="{% url 'studios:admin_panel' %}" class="nav-menu-link">Админка</a>
+                {% endif %}
+            {% endif %}
+        </div>
+        
+
+        <div class="nav-auth">
+            {% if user.is_authenticated %}
+                <a href="{% url 'studios:logout' %}" class="nav-link">Выход</a>
+            {% else %}
+                <a href="{% url 'studios:login' %}" class="nav-link">Авторизация</a>
+            {% endif %}
+
+            <div class="nav-icon" aria-hidden="true">
+                <img src="{% static 'images/door-icon.png' %}" alt="" />
+            </div>
+        </div>
+    </div>
+</nav>
+

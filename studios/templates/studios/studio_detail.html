@@ -1,0 +1,1079 @@
+{% extends 'studios/base.html' %}
+{% load static %}
+
+{% block title %}{{ studio.name }} — АРИРАН{% endblock %}
+
+{% block extra_styles %}
+<style>
+body {
+    background: #f2f3f7 !important;
+}
+
+.footer {
+    background: #f2f3f7 !important;
+}
+
+.footer-top,
+.footer-middle,
+.footer-bottom {
+    border-color: rgba(0,0,0,0.1) !important;
+}
+
+.footer-logo,
+.footer-nav a,
+.footer-contacts .phone,
+.footer-contacts .email,
+.footer-contacts .address,
+.footer-schedule,
+.footer-schedule .time,
+.footer-copy,
+.footer-legal a {
+    color: #1a1a1a !important;
+}
+
+.footer-nav a:hover,
+.footer-contacts .phone:hover,
+.footer-contacts .email:hover,
+.footer-legal a:hover {
+    color: #788BFF !important;
+}
+
+.social-link {
+    border-color: rgba(0,0,0,0.2) !important;
+}
+
+.social-link svg {
+    fill: #1a1a1a !important;
+}
+
+.social-link:hover {
+    border-color: #788BFF !important;
+    background: rgba(120,139,255,0.1) !important;
+}
+
+.social-link:hover svg {
+    fill: #788BFF !important;
+}
+
+.studio-detail-page {
+    background: #f2f3f7;
+    min-height: 100vh;
+    max-width: 1744px;
+    margin: 0 auto;
+    padding: 120px 88px 60px;
+}
+
+/* Чтобы top-nav не получал смещение из-за padding страницы */
+.top-nav {
+    padding: 0 !important;
+}
+
+
+
+
+.studio-detail-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    margin-bottom: 24px;
+    align-items: start;
+    animation: fadeInUp 0.5s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.breadcrumb {
+    grid-column: 1 / -1;
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 0;
+    padding: 0 4px;
+}
+
+.breadcrumb a {
+    color: #788BFF;
+    text-decoration: none;
+    transition: color 0.2s;
+    font-weight: 500;
+}
+
+.breadcrumb a:hover {
+    color: #5a6fd6;
+    text-decoration: underline;
+}
+
+/* Галерея */
+.studio-gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: sticky;
+    top: 20px;
+}
+
+.main-image {
+    width: 100%;
+    aspect-ratio: 16/10;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #f0f1f5;
+    position: relative;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    cursor: pointer;
+}
+
+.main-image-arrows {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    z-index: 5;
+    pointer-events: none;
+}
+
+.gallery-nav-btn {
+    pointer-events: auto;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.6);
+    background: rgba(0,0,0,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.gallery-nav-btn:hover {
+    background: rgba(0,0,0,0.45);
+    border-color: rgba(255,255,255,0.9);
+    transform: translateY(-50%) scale(1.03);
+}
+
+.gallery-nav-btn.prev { left: 16px; }
+.gallery-nav-btn.next { right: 16px; }
+
+.gallery-nav-btn svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: #fff;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+
+.main-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+}
+
+.main-image:hover img {
+    transform: scale(1.02);
+}
+
+.thumbnail-list {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.thumbnail {
+    aspect-ratio: 16/10;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    background: #f0f1f5;
+    border: 3px solid transparent;
+    transition: all 0.25s ease;
+    position: relative;
+}
+
+.thumbnail::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0);
+    transition: background 0.25s;
+}
+
+.thumbnail:hover::after {
+    background: rgba(0,0,0,0.1);
+}
+
+.thumbnail.active {
+    border-color: #788BFF;
+    box-shadow: 0 4px 12px rgba(120,139,255,0.3);
+}
+
+.thumbnail.active::after {
+    background: rgba(120,139,255,0.15);
+}
+
+.thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Информация */
+.studio-info {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.studio-header {
+    margin-bottom: 0;
+}
+
+.studio-header h1 {
+    font-size: 36px;
+    font-weight: 800;
+    color: #1a1a1a;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+}
+
+.studio-category {
+    font-size: 16px;
+    color: #788BFF;
+    margin-bottom: 16px;
+    font-weight: 500;
+    display: inline-block;
+    padding: 6px 14px;
+    background: rgba(120, 139, 255, 0.1);
+    border-radius: 16px;
+}
+
+.studio-meta {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    color: #555;
+    padding: 8px 14px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    transition: all 0.2s;
+}
+
+.meta-item:hover {
+    background: #f0f1f5;
+    transform: translateY(-1px);
+}
+
+.meta-item svg {
+    width: 18px;
+    height: 18px;
+    stroke: #788BFF;
+    flex-shrink: 0;
+}
+
+.studio-price-block {
+    background: linear-gradient(135deg, #f7f8fc 0%, #e8eaf6 100%);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 0;
+    border: 2px solid rgba(120, 139, 255, 0.15);
+}
+
+.studio-price-block .label {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 4px;
+    font-weight: 500;
+}
+
+.studio-price-block .price {
+    font-size: 32px;
+    font-weight: 800;
+    color: #1a1a1a;
+    letter-spacing: -1px;
+}
+
+.studio-price-block .price span {
+    font-size: 16px;
+    font-weight: 500;
+    color: #666;
+}
+
+/* Календарь */
+.booking-calendar {
+    margin-bottom: 0;
+}
+
+.booking-calendar h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.booking-calendar h3::before {
+    content: '';
+    width: 4px;
+    height: 20px;
+    background: #788BFF;
+    border-radius: 2px;
+}
+
+.week-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.week-nav-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid #e0e0e0;
+    background: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    font-size: 16px;
+    color: #333;
+}
+
+.week-nav-btn:hover:not(:disabled) {
+    border-color: #788BFF;
+    color: #788BFF;
+    background: rgba(120,139,255,0.05);
+}
+
+.week-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.week-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #666;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: 60px repeat(7, 1fr);
+    gap: 4px;
+    background: #f7f8fc;
+    border-radius: 14px;
+    padding: 14px;
+}
+
+.time-label {
+    padding: 10px 4px;
+    font-size: 13px;
+    color: #666;
+    text-align: center;
+    font-weight: 600;
+}
+
+.day-header {
+    padding: 10px 4px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #333;
+    text-align: center;
+}
+
+.time-cell {
+    padding: 12px 4px;
+    font-size: 13px;
+    text-align: center;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #fff;
+    border: 2px solid #e8e8e8;
+    font-weight: 600;
+    color: #333;
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+}
+
+.time-cell.available:hover {
+    background: #788BFF;
+    color: #fff;
+    border-color: #788BFF;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(120,139,255,0.3);
+}
+
+.time-cell.selected {
+    background: #788BFF;
+    color: #fff;
+    border-color: #5a6fd6;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(120,139,255,0.3);
+}
+
+.time-cell.unavailable {
+    background: #f5f5f5;
+    color: #ccc;
+    cursor: not-allowed;
+    border-color: #e8e8e8;
+    text-decoration: line-through;
+}
+
+/* Анимации календаря */
+@keyframes slideInFromRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInFromLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.calendar-grid {
+    animation: slideInFromRight 0.3s ease;
+}
+
+/* Дополнительные опции */
+.additional-options {
+    background: #f7f8fc;
+    border-radius: 14px;
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 2px solid rgba(120, 139, 255, 0.1);
+}
+
+.additional-options:hover {
+    background: #f0f1f5;
+    border-color: rgba(120, 139, 255, 0.2);
+}
+
+.options-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+/* Итого */
+.booking-summary {
+    background: #f7f8fc;
+    border-radius: 16px;
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    border: 2px solid rgba(120, 139, 255, 0.15);
+
+    /* По центру снизу и по появлению */
+    position: fixed;
+    left: 50%;
+    bottom: 28px;
+    transform: translateX(-50%) translateY(34px);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 9999;
+
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* Появление при выборе времени */
+.booking-summary.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+    animation: bookingSummaryPop 0.55s cubic-bezier(0.2, 1.1, 0.2, 1) both;
+}
+
+@keyframes bookingSummaryPop {
+    0% {
+        transform: translateX(-50%) translateY(34px) scale(0.98);
+    }
+    60% {
+        transform: translateX(-50%) translateY(-6px) scale(1.01);
+    }
+    100% {
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+}
+
+
+.summary-left {
+    flex: 1;
+}
+
+.summary-label {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 4px;
+    font-weight: 500;
+}
+
+.summary-value {
+    font-size: 28px;
+    font-weight: 800;
+    color: #1a1a1a;
+    margin-bottom: 4px;
+    letter-spacing: -0.5px;
+}
+
+.summary-details {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.4;
+}
+
+.btn-book-now {
+    padding: 14px 32px;
+    background: linear-gradient(135deg, #788BFF 0%, #5a6fd6 100%);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+    font-family: Helvetica, Arial, sans-serif;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(120,139,255,0.3);
+}
+
+.btn-book-now:hover {
+    background: linear-gradient(135deg, #5a6fd6 0%, #4a5fb8 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(120,139,255,0.4);
+}
+
+/* Описание */
+.studio-description {
+    background: #fff;
+    border-radius: 20px;
+    padding: 32px 40px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    animation: fadeInUp 0.5s ease 0.1s both;
+}
+
+.studio-description h2 {
+    font-size: 24px;
+    font-weight: 800;
+    color: #1a1a1a;
+    margin-bottom: 16px;
+}
+
+.studio-description p {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #555;
+}
+
+.time-cell.unavailable {
+    background: #f5f5f5;
+    color: #bbb;
+    cursor: not-allowed;
+    border-color: #eeeeee;
+    position: relative;
+}
+
+.time-cell.unavailable::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    right: 10%;
+    height: 1.5px;
+    background: #ccc;
+    transform: translateY(-50%);
+}
+
+@media (max-width: 1024px) {
+    .studio-detail-page {
+        padding: 80px 24px 60px;
+    }
+
+    .studio-detail-container {
+        grid-template-columns: 1fr;
+        padding: 24px;
+        gap: 24px;
+    }
+
+    .studio-gallery {
+        position: static;
+    }
+
+    .booking-calendar .calendar-grid {
+        grid-template-columns: 50px repeat(7, 1fr);
+        padding: 10px;
+    }
+
+    .time-cell {
+        padding: 8px 2px;
+        font-size: 11px;
+    }
+
+    .studio-header h1 {
+        font-size: 28px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="studio-detail-page">
+    <div class="studio-detail-container">
+        <div class="breadcrumb">
+            <a href="{% url 'studios:catalog' %}">Каталог фотостудий</a> / {{ studio.name }}
+        </div>
+
+        <div class="studio-gallery">
+            <div class="main-image" id="mainImageContainer">
+                <div class="main-image-arrows" aria-hidden="true">
+                    <button type="button" class="gallery-nav-btn prev" id="galleryPrev" aria-label="Предыдущее фото" onclick="prevPhoto()">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M15 18l-6-6 6-6"/>
+                        </svg>
+                    </button>
+                    <button type="button" class="gallery-nav-btn next" id="galleryNext" aria-label="Следующее фото" onclick="nextPhoto()">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M9 6l6 6-6 6"/>
+                        </svg>
+                    </button>
+                </div>
+
+                {% if photos.first %}
+                <img src="{{ photos.first.image.url }}" alt="{{ studio.name }}" id="mainImage">
+                {% else %}
+                <img src="{% static 'images/empty-studio.jpg' %}" alt="{{ studio.name }}" id="mainImage">
+                {% endif %}
+            </div>
+
+            <div class="thumbnail-list">
+                {% for photo in photos %}
+                <div class="thumbnail {% if forloop.first %}active{% endif %}" 
+                     onclick="changeImage('{{ photo.image.url }}', this)"
+                     data-index="{{ forloop.counter0 }}">
+                    <img src="{{ photo.image.url }}" alt="Фото {{ forloop.counter }}">
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="studio-info">
+            <div class="studio-header">
+                <h1>{{ studio.name }}</h1>
+                {% if studio.category %}
+                <div class="studio-category">{{ studio.category.name }}</div>
+                {% endif %}
+                <div class="studio-meta">
+                    <div class="meta-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <path d="M3 9h18M9 3v18"/>
+                        </svg>
+                        {{ studio.area }} м²
+                    </div>
+                    <div class="meta-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2v20M8 6l4-4 4 4"/>
+                        </svg>
+                        {{ studio.ceiling_height }} м
+                    </div>
+                </div>
+                <div class="studio-price-block">
+                    <div class="label">Стоимость аренды:</div>
+                    <div class="price">{{ studio.price_per_hour|floatformat:0 }}₽ <span>за час</span></div>
+                </div>
+            </div>
+
+            <div class="booking-calendar">
+                <h3>Выберите свободное время:</h3>
+                
+                <div class="week-navigation">
+                    <button class="week-nav-btn" id="prevWeek" onclick="changeWeek(-1)">‹</button>
+                    <span class="week-label">Неделя</span>
+                    <button class="week-nav-btn" id="nextWeek" onclick="changeWeek(1)">›</button>
+                </div>
+
+                <div class="calendar-grid" id="bookingCalendar"></div>
+            </div>
+
+            <div class="additional-options" onclick="toggleOptions()">
+                <div class="options-header">
+                    <span>Дополнительные опции:</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="booking-summary">
+                <div class="summary-left">
+                    <div class="summary-label">Всего:</div>
+                    <div class="summary-value" id="totalPrice">{{ studio.price_per_hour|floatformat:0 }} руб.</div>
+                    <div class="summary-details" id="bookingDetails">Выберите время для бронирования</div>
+                </div>
+                <button class="btn-book-now" onclick="bookStudio()">Забронировать</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="studio-description">
+        <h2>Описание студии</h2>
+        <p>{{ studio.description }}</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+{{ days|json_script:"days-data" }}
+{{ hours|json_script:"hours-data" }}
+
+<script>
+// Конвертируем Decimal в число для JavaScript
+const basePrice = parseFloat("{{ studio.price_per_hour }}");
+const studioId = {{ studio.id }};
+const bookedSlots = new Set({{ booked_slots|safe }});
+const studioName = "{{ studio.name|escapejs }}";
+const csrfToken = "{{ csrf_token }}";
+
+// Глобальные переменные
+let selectedSlots = [];
+let allDays = [];
+let allHours = [];
+let currentWeek = 0;
+const weeksTotal = 4;
+
+// Парсим JSON данные используя json_script
+try {
+    const daysElement = document.getElementById('days-data');
+    const hoursElement = document.getElementById('hours-data');
+    
+    if (daysElement && hoursElement) {
+        allDays = JSON.parse(daysElement.textContent);
+        allHours = JSON.parse(hoursElement.textContent);
+        console.log('Days loaded:', allDays.length);
+        console.log('Hours loaded:', allHours.length);
+    } else {
+        console.error('Data elements not found');
+    }
+} catch (e) {
+    console.error('Error parsing JSON:', e);
+    allDays = [];
+    allHours = [];
+}
+
+// Все функции объявляем глобально через window
+window.changeWeek = function(direction) {
+    const newWeek = currentWeek + direction;
+    if (newWeek >= 0 && newWeek < weeksTotal) {
+        currentWeek = newWeek;
+        renderWeek(currentWeek);
+    }
+};
+
+window.changeImage = function(src, thumbnail) {
+    document.getElementById('mainImage').src = src;
+    document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+    thumbnail.classList.add('active');
+};
+
+function changeImageByIndex(index) {
+    const thumbnails = Array.from(document.querySelectorAll('.thumbnail'));
+    if (!thumbnails.length) return;
+
+    const safeIndex = (index + thumbnails.length) % thumbnails.length; // зацикливание
+    const target = thumbnails[safeIndex];
+    const img = target.querySelector('img');
+    if (!img) return;
+
+    window.changeImage(img.src, target);
+}
+
+window.prevPhoto = function() {
+    const thumbnails = Array.from(document.querySelectorAll('.thumbnail'));
+    const active = thumbnails.findIndex(t => t.classList.contains('active'));
+    const activeIndex = active >= 0 ? active : 0;
+    changeImageByIndex(activeIndex - 1);
+};
+
+window.nextPhoto = function() {
+    const thumbnails = Array.from(document.querySelectorAll('.thumbnail'));
+    const active = thumbnails.findIndex(t => t.classList.contains('active'));
+    const activeIndex = active >= 0 ? active : 0;
+    changeImageByIndex(activeIndex + 1);
+};
+
+window.selectTimeSlot = function(element) {
+
+    if (element.classList.contains('unavailable')) return;
+
+    const hour = element.dataset.hour;
+    const date = element.dataset.date;
+    const dayName = element.dataset.day;
+    const fullDate = element.dataset.fullDate;
+    const key = `${date}_${hour}`;
+
+    if (element.classList.contains('selected')) {
+        element.classList.remove('selected');
+        selectedSlots = selectedSlots.filter(slot => slot.key !== key);
+    } else {
+        element.classList.add('selected');
+        selectedSlots.push({ key, hour, date, dayName, fullDate });
+    }
+
+    selectedSlots.sort((a, b) => {
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
+        return parseInt(a.hour) - parseInt(b.hour);
+    });
+
+    updateBookingSummary();
+};
+
+window.toggleOptions = function() {
+    alert('Функционал дополнительных опций будет добавлен позже');
+};
+
+window.bookStudio = async function() {
+    if (selectedSlots.length === 0) {
+        alert('Пожалуйста, выберите время для бронирования');
+        return;
+    }
+
+    // Строим диапазоны (та же логика что в updateBookingSummary)
+    const ranges = [];
+    let currentRange = null;
+
+    selectedSlots.forEach((slot) => {
+        const slotHourInt = parseInt(slot.hour, 10);
+        if (!currentRange) {
+            currentRange = { startDate: slot.date, startHour: slotHourInt, endDate: slot.date, endHourExclusive: slotHourInt + 1 };
+            return;
+        }
+        const sameDate = slot.date === currentRange.startDate;
+        if (sameDate && slotHourInt === currentRange.endHourExclusive) {
+            currentRange.endHourExclusive = slotHourInt + 1;
+        } else {
+            ranges.push(currentRange);
+            currentRange = { startDate: slot.date, startHour: slotHourInt, endDate: slot.date, endHourExclusive: slotHourInt + 1 };
+        }
+    });
+    if (currentRange) ranges.push(currentRange);
+
+    const formatHour = (h) => String(h).padStart(2, '0') + ':00';
+
+    try {
+        for (const range of ranges) {
+            const response = await fetch('/booking/create/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify({
+                    studio_id: studioId,
+                    start_date: range.startDate,
+                    start_time: formatHour(range.startHour),
+                    end_date: range.endDate,
+                    end_time: range.endHourExclusive,
+                    equipment: []
+                })
+            });
+            const data = await response.json();
+            if (!data.success) {
+                alert('Ошибка: ' + data.error);
+                return;
+            }
+        }
+        alert('Бронирование успешно создано!');
+        window.location.href = '/profile/';
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Произошла ошибка при создании бронирования');
+    }
+};
+
+function renderWeek(weekOffset) {
+    const calendar = document.getElementById('bookingCalendar');
+    const prevBtn = document.getElementById('prevWeek');
+    const nextBtn = document.getElementById('nextWeek');
+    
+    if (!calendar) {
+        console.error('Calendar element not found!');
+        return;
+    }
+    
+    const startDay = weekOffset * 7;
+    const weekDays = allDays.slice(startDay, startDay + 7);
+    
+    if (prevBtn) prevBtn.disabled = weekOffset === 0;
+    if (nextBtn) nextBtn.disabled = weekOffset >= weeksTotal - 1;
+    
+    let html = '<div class="time-label">Время</div>';
+    weekDays.forEach(day => {
+        html += `<div class="day-header">${day.name}</div>`;
+    });
+    
+    allHours.forEach(hour => {
+        html += `<div class="time-label">${hour}</div>`;
+        weekDays.forEach(day => {
+            const slotKey = `${day.date}_${hour}`;
+            const isBooked = bookedSlots.has(slotKey);
+            const isAvailable = isBooked ? 'unavailable' : 'available';
+            const isSelected = selectedSlots.some(slot => slot.key === `${day.date}_${hour}`) ? 'selected' : '';
+            html += `<div class="time-cell ${isAvailable} ${isSelected}" 
+                         data-hour="${hour}" 
+                         data-date="${day.date}"
+                         data-day="${day.day_name}"
+                         data-full-date="${day.full_date}"
+                         onclick="selectTimeSlot(this)">
+                        ${hour}
+                    </div>`;
+        });
+    });
+    
+    calendar.innerHTML = html;
+    console.log('Calendar rendered for week', weekOffset);
+}
+
+function updateBookingSummary() {
+    const hoursCount = selectedSlots.length;
+    const total = hoursCount * basePrice;
+
+    document.getElementById('totalPrice').textContent = total.toLocaleString() + ' руб.';
+
+    const summaryEl = document.querySelector('.booking-summary');
+
+    if (hoursCount > 0) {
+        if (summaryEl) summaryEl.classList.add('visible');
+
+        const firstSlot = selectedSlots[0];
+        const lastSlot = selectedSlots[selectedSlots.length - 1];
+        const endTime = parseInt(lastSlot.hour) + 1;
+        // Формируем блоки по непрерывным выбранным часам
+        // Важно: склеиваем только если подряд идут часы в рамках ОДНОЙ ДАТЫ.
+        const ranges = [];
+        let currentRange = null;
+
+
+        selectedSlots.forEach((slot) => {
+            const slotHourInt = parseInt(slot.hour, 10);
+            if (!currentRange) {
+                currentRange = {
+                    fullDate: slot.fullDate,
+                    startHour: slotHourInt,
+                    endHourExclusive: slotHourInt + 1,
+                    endDate: slot.date,
+                    startDate: slot.date
+                };
+                return;
+            }
+
+            const sameDate = slot.date === currentRange.startDate;
+            const prevEnd = currentRange.endHourExclusive;
+
+            // Соседние часы того же дня считаем частью одного диапазона
+            if (sameDate && slotHourInt === prevEnd) {
+                currentRange.endHourExclusive = slotHourInt + 1;
+            } else {
+                ranges.push(currentRange);
+                currentRange = {
+                    fullDate: slot.fullDate,
+                    startHour: slotHourInt,
+                    endHourExclusive: slotHourInt + 1,
+                    endDate: slot.date,
+                    startDate: slot.date
+                };
+            }
+        });
+
+        if (currentRange) ranges.push(currentRange);
+
+        // Время показываем как «HH:00» без лишних секунд.
+        const formatTime = (h) => String(h).padStart(2, '0') + ':00';
+
+        const detailsText = `${hoursCount} ${getHoursWord(hoursCount)}. Аренда студии ${studioName} —\n${ranges.map(r => {
+            return ` ${r.fullDate} с ${formatTime(r.startHour)} до ${formatTime(r.endHourExclusive)}`;
+        }).join('\n')}`;
+
+        document.getElementById('bookingDetails').textContent = detailsText;
+
+    } else {
+        if (summaryEl) summaryEl.classList.remove('visible');
+        document.getElementById('bookingDetails').textContent = 'Выберите время для бронирования';
+    }
+}
+
+
+function getHoursWord(hours) {
+    if (hours === 1) return 'бронь';
+    if (hours >= 2 && hours <= 4) return 'брони';
+    return 'броней';
+}
+
+// Инициализация при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing calendar...');
+    if (allDays.length > 0 && allHours.length > 0) {
+        renderWeek(0);
+    } else {
+        console.error('No data available for calendar');
+    }
+});
+</script>
+{% endblock %}

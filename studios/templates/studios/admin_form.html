@@ -1,0 +1,55 @@
+{% extends 'studios/base.html' %}
+{% load static %}
+{% block title %}{{ title }} — АРИРАН{% endblock %}
+{% block extra_styles %}
+<style>
+body { background: #f2f3f7 !important; }
+.footer { background: #f2f3f7 !important; }
+.footer-top, .footer-middle, .footer-bottom { border-color: rgba(0,0,0,0.1) !important; }
+.footer-logo, .footer-nav a, .footer-contacts .phone, .footer-contacts .email,
+.footer-contacts .address, .footer-schedule, .footer-schedule .time,
+.footer-copy, .footer-legal a { color: #1a1a1a !important; }
+
+.adm-page { max-width: 860px; margin: 0 auto; padding: 120px 88px 60px; }
+.adm-card { background: #fff; border-radius: 16px; padding: 32px 40px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.adm-card-title { font-size: 22px; font-weight: 700; color: #1a1a1a; margin-bottom: 28px; }
+.adm-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+.adm-label { font-size: 13px; font-weight: 600; color: #888; }
+.adm-input, .adm-select, .adm-textarea {
+    padding: 12px 16px; border: 1px solid #e0e0e0; border-radius: 10px;
+    font-family: Helvetica, Arial, sans-serif; font-size: 14px; color: #1a1a1a;
+    outline: none; transition: border-color 0.2s; background: #fafbff; width: 100%;
+}
+.adm-input:focus, .adm-select:focus, .adm-textarea:focus { border-color: #788BFF; }
+.adm-textarea { resize: vertical; }
+.adm-checkbox { width: 18px; height: 18px; accent-color: #788BFF; }
+.error-text { font-size: 12px; color: #dc3545; }
+.adm-actions { display: flex; gap: 12px; margin-top: 28px; }
+.btn-save { padding: 12px 32px; background: #788BFF; color: #fff; border: none; border-radius: 50px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: Helvetica, Arial, sans-serif; transition: background 0.2s; }
+.btn-save:hover { background: #5a6fd6; }
+.btn-back { padding: 12px 32px; background: #f0f1f5; color: #666; border: none; border-radius: 50px; font-size: 15px; font-weight: 600; text-decoration: none; font-family: Helvetica, Arial, sans-serif; transition: background 0.2s; }
+.btn-back:hover { background: #e0e1e5; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="adm-page">
+    <div class="adm-card">
+        <div class="adm-card-title">{{ title }}</div>
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="adm-field">
+                <label class="adm-label">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}<div class="error-text">{{ field.errors.0 }}</div>{% endif %}
+            </div>
+            {% endfor %}
+            <div class="adm-actions">
+                <button type="submit" class="btn-save">Сохранить</button>
+                <a href="{% url back_url %}" class="btn-back">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

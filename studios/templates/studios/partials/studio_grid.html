@@ -1,0 +1,61 @@
+{% load static %}
+<div class="studios-header">
+    <div class="studios-count">Найдено: {{ studios.count }} студий</div>
+    <select class="sort-select" onchange="location = this.value;">
+        <option value="?{% if request.GET.type %}type={{ request.GET.type }}&{% endif %}{% if request.GET.date %}date={{ request.GET.date }}&{% endif %}sort=name" {% if request.GET.sort == 'name' or not request.GET.sort %}selected{% endif %}>Сортировать по: названию</option>
+        <option value="?{% if request.GET.type %}type={{ request.GET.type }}&{% endif %}{% if request.GET.date %}date={{ request.GET.date }}&{% endif %}sort=price_asc" {% if request.GET.sort == 'price_asc' %}selected{% endif %}>Сортировать по: цене (возрастание)</option>
+        <option value="?{% if request.GET.type %}type={{ request.GET.type }}&{% endif %}{% if request.GET.date %}date={{ request.GET.date }}&{% endif %}sort=price_desc" {% if request.GET.sort == 'price_desc' %}selected{% endif %}>Сортировать по: цене (убывание)</option>
+    </select>
+</div>
+
+<div class="studios-grid">
+    {% for studio in studios %}
+    <div class="studio-card fade-in">
+        {% if studio.photos.first %}
+        <img src="{{ studio.photos.first.image.url }}" alt="{{ studio.name }}" class="studio-image">
+        {% else %}
+        <img src="{% static 'images/empty-image.png' %}" alt="{{ studio.name }}" class="studio-image">
+        {% endif %}
+        
+        <div class="studio-info">
+            <h3 class="studio-name">{{ studio.name }}</h3>
+            <p class="studio-type">{{ studio.get_type_display }}</p>
+            {% if studio.interior %}
+            <p class="studio-interior">{{ studio.get_interior_display }}</p>
+            {% endif %}
+            
+            <div class="studio-params">
+                <div class="studio-param">
+                    <span>📐</span>
+                    <span>{{ studio.area }} м²</span>
+                </div>
+                <div class="studio-param">
+                    <span>⬆</span>
+                    <span>{{ studio.ceiling_height }} м</span>
+                </div>
+                <div class="studio-param">
+                    <span>👥</span>
+                    <span>{{ studio.capacity }} чел</span>
+                </div>
+            </div>
+            
+            <div class="studio-price">от {{ studio.price_per_hour }}₽/час</div>
+            
+            <a href="{% url 'studios:studio_detail' studio.pk %}" class="btn btn-book">Забронировать</a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="no-results">
+        <p>Студии не найдены</p>
+        <p>Попробуйте изменить параметры фильтрации</p>
+    </div>
+    {% endfor %}
+</div>
+
+{% if has_more %}
+<div class="load-more">
+    <button class="btn btn-load-more" hx-get="{% url 'studios:catalog' %}?page={{ current_page|add:1 }}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}{% if request.GET.date %}&date={{ request.GET.date }}{% endif %}" hx-target="#studiosContainer" hx-swap="beforeend" hx-indicator=".load-more">
+        Показать ещё
+    </button>
+</div>
+{% endif %}

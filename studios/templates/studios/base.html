@@ -1,0 +1,69 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}АРИРАН — Креативный комплекс студийных помещений{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'studios/css/style.css' %}">
+    {% block extra_head %}{% endblock %}
+    {% block extra_styles %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation Bar (default for non-home pages) -->
+{% block nav %}
+    {% include 'studios/partials/nav_menu.html' %}
+{% endblock nav %}
+
+
+    {% block content %}{% endblock %}
+
+{% block footer %}
+    <!-- Footer -->
+    <footer class="footer">
+
+
+        <div class="container">
+            <div class="footer-top">
+                <div class="footer-logo">АРИРАН</div>
+                <nav class="footer-nav">
+                    <a href="{% url 'studios:index' %}">Главная</a>
+                    <a href="{% url 'studios:catalog' %}">Каталог</a>
+                    <a href="#block2">О нас</a>
+                    <a href="#block7">FAQ</a>
+                    <a href="#block6">Контакты</a>
+                </nav>
+                <div class="footer-contacts">
+                    <a href="tel:+79001234567" class="phone">+7 (900) 123-45-67</a>
+                    <a href="mailto:info@ariran.ru" class="email">info@ariran.ru</a>
+                    <div class="address">ул. Мира 10, Волгоград<br>400066</div>
+                </div>
+            </div>
+            <div class="footer-middle">
+                <div class="footer-social">
+                    <a href="#" class="social-link" aria-label="Telegram">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="VK">
+                        <svg viewBox="0 0 24 24"><path d="M12.785 16.241s.288-.032.436-.194c.136-.148.132-.427.132-.427s-.02-1.304.587-1.496c.598-.189 1.366 1.26 2.18 1.817.615.42 1.083.328 1.083.328l2.177-.03s1.14-.07.599-.964c-.044-.073-.314-.661-1.617-1.869-1.364-1.264-1.182-1.059.462-3.246.999-1.332 1.398-2.146 1.273-2.494-.12-.332-.856-.244-.856-.244l-2.45.015s-.182-.025-.317.056c-.131.079-.216.263-.216.263s-.387 1.028-.903 1.903c-1.089 1.848-1.524 1.946-1.703 1.832-.414-.266-.31-1.07-.31-1.64 0-1.783.27-2.52-.527-2.713-.265-.064-.46-.106-1.138-.113-.87-.009-1.608.003-2.024.207-.277.136-.49.44-.36.457.16.021.522.098.714.361.248.34.24 1.103.24 1.103s.142 2.096-.332 2.353c-.326.178-.774-.185-1.738-1.847-.493-.851-.864-1.79-.864-1.79s-.072-.176-.2-.271c-.155-.115-.372-.151-.372-.151l-2.327.015s-.35.01-.478.162c-.114.135-.009.413-.009.413s1.817 4.244 3.874 6.383c1.887 1.963 4.029 1.834 4.029 1.834h.971z"/></svg>
+                    </a>
+                </div>
+                <div class="footer-schedule">
+                    Рабочие часы: <span class="time">10:00 — 22:00</span>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div class="footer-copy">© 2025 Ариран. Все права защищены.</div>
+                <div class="footer-legal">
+                    <a href="#">Политика конфиденциальности</a>
+                    <a href="#">Пользовательское соглашение</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+{% endblock %}
+
+    <script src="{% static 'studios/js/main.js' %}"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

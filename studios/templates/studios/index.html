@@ -1,0 +1,434 @@
+{% extends 'studios/base.html' %}
+{% load static %}
+
+{% block nav %}
+    {% include 'studios/partials/nav_menu.html' %}
+{% endblock nav %}
+
+{% block content %}
+<script>document.body.classList.add('home-page');</script>
+    <!-- ==================== BLOCK 1: HERO ==================== -->
+<section class="hero" id="hero">\r\n        <div class="container">\r\n            <div class="hero-content">
+                <h1 class="hero-title fade-in">СОЗДАВАЙТЕ</h1>
+                <p class="hero-subtitle fade-in fade-in-delay-1">Креативный комплекс студийных помещений</p>
+                <h1 class="hero-title fade-in fade-in-delay-2">БЕЗ</h1>
+                <p class="hero-subtitle fade-in fade-in-delay-3">для фото и видео съёмок</p>
+                <h1 class="hero-title fade-in fade-in-delay-4">ГРАНИЦ</h1>
+                <a href="{% url 'studios:catalog' %}" class="cta-button fade-in fade-in-delay-4">[ к а т а л о г  с т у д и й ]</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== BLOCK 2: ABOUT ==================== -->
+    <section class="block2" id="block2">
+        <div class="container">
+            <div class="top-section fade-in">
+                <div class="main-title">
+                    <div class="line1">Больше чем <span class="highlight">агрегатор</span></div>
+                    <div class="line2">— <span class="bold-text">Ваш комфорт</span></div>
+                    <div class="line3">наша задача</div>
+                </div>
+
+                <div class="right-info">
+                    <div class="sparkle-text">
+                        <svg class="sparkle-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="#1a1a1a"/>
+                        </svg>
+                        <p>Когда<br>Всё в одном месте</p>
+                    </div>
+
+                    <div class="description">
+                        <span class="brand">Ариран</span><span class="dash">——</span><span class="desc-text">комплекс студийных помещений</span><br>
+                        <span class="desc-text">где каждый найдёт что-то для себя</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bottom-wrapper fade-in fade-in-delay-1">
+                <button class="arrow-btn" id="nextBtn" aria-label="Следующий блок">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+
+                <div class="cards-wrapper">
+                    <div class="card" data-index="0">
+                        <div class="card-text">Опытные специалисты всегда готовы помочь вам в реализации ваших креативных задумок</div>
+                        <div class="card-number">01</div>
+                    </div>
+                    <div class="card active" data-index="1">
+                        <div class="card-text">Персональный подход к каждому нашему клиенту</div>
+                        <div class="card-number">02</div>
+                    </div>
+                    <div class="card" data-index="2">
+                        <div class="card-text">Удобная система бронирования</div>
+                        <div class="card-number">03</div>
+                    </div>
+                    <div class="card" data-index="3">
+                        <div class="card-text">Наличие дополнительного оборудования для вас</div>
+                        <div class="card-number">04</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== BLOCK 3: КАТЕГОРИИ ==================== -->
+    <section class="block3" id="block3">
+        <div class="container">
+            <div class="block-header fade-in">
+                <div class="line1">Категории</div>
+                <div class="line2">— студийных помещений комплекса</div>
+            </div>
+
+            <div class="grid-wrapper fade-in fade-in-delay-1">
+                <div class="grid-item active pos-1" data-pos="1">
+                    <div class="item-content">
+                        <span class="item-label">Циклорама</span>
+                        <span class="item-number">01</span>
+                    </div>
+                </div>
+                <div class="grid-item pos-2" data-pos="2">
+                    <div class="item-content">
+                        <span class="item-label">Интерьерная</span>
+                        <span class="item-number">02</span>
+                    </div>
+                </div>
+                <div class="grid-item pos-3" data-pos="3">
+                    <div class="item-content">
+                        <span class="item-label">Хромакей</span>
+                        <span class="item-number">03</span>
+                    </div>
+                </div>
+                <div class="grid-item pos-4" data-pos="4">
+                    <div class="item-content">
+                        <span class="item-label">Тематическая</span>
+                        <span class="item-number">04</span>
+                    </div>
+                </div>
+                <div class="grid-item pos-5" data-pos="5">
+                    <div class="item-content">
+                        <span class="item-label">Подкаст</span>
+                        <span class="item-number">05</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="block-footer fade-in fade-in-delay-2">
+                <p>обширный выбор студий под ваши цели</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== BLOCK 4: ПОЧЕМУ ВЫБИРАЮТ ==================== -->
+    <section class="block4" id="block4">
+        <div class="container">
+            <div class="block-header fade-in">
+                <div class="line1">Почему выбирают</div>
+                <div class="line2">— Ариран</div>
+            </div>
+
+            <div class="phones-section">
+                <div class="phone-column fade-in">
+                    <div class="phone-label">
+                        <div class="number">01</div>
+                        <div class="text">Онлайн<br>бронирование</div>
+                    </div>
+                    <div class="phone-image" style="background-image: url('{% static 'images/mockup-1.png' %}');"></div>
+                </div>
+
+                <div class="phone-column fade-in fade-in-delay-1">
+                    <div class="phone-label">
+                        <div class="number">02</div>
+                        <div class="text">Удобный<br>личный кабинет</div>
+                    </div>
+                    <div class="phone-image" style="background-image: url('{% static 'images/mockup-2.png' %}');"></div>
+                </div>
+
+                <div class="phone-column fade-in fade-in-delay-2">
+                    <div class="phone-label">
+                        <div class="number">03</div>
+                        <div class="text">Большой<br>выбор пространств</div>
+                    </div>
+                    <div class="phone-image" style="background-image: url('{% static 'images/mockup-3.png' %}');"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== BLOCK 5: ПОПУЛЯРНЫЕ СТУДИИ ==================== -->
+    <section class="block5" id="block5">
+        <div class="container">
+            <div class="block-header fade-in">
+                <div class="line1">Популярные студии</div>
+                <div class="line2">— комплекса</div>
+            </div>
+
+            <div class="grid-wrapper fade-in fade-in-delay-1">
+                {% for studio in popular_studios %}
+                    <div class="grid-item pos-{{ forloop.counter }}" data-pos="{{ forloop.counter }}" style="background-image: url('{% if studio.photos.first %}{{ studio.photos.first.image.url }}{% else %}{% static 'images/empty-image.png' %}{% endif %}');">
+                        <div class="item-content">
+                            <span class="item-label">{{ studio.name }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== BLOCK 6: ГДЕ МЫ НАХОДИМСЯ ==================== -->
+    <section class="block6" id="block6">
+        <div class="container">
+            <div class="block-header fade-in">
+                <div class="title">Где мы находимся</div>
+            </div>
+
+            <div class="content fade-in fade-in-delay-1">
+                <div class="map-wrapper">
+                    <iframe src="https://yandex.ru/map-widget/v1/?ll=44.513696%2C48.707317&z=17&pt=44.513696%2C48.707317%2Cpm2rdm" allowfullscreen></iframe>
+                </div>
+
+                <div class="info">
+                    <div class="info-block">
+                        <div class="name">Комплекс Ариран</div>
+                        <div class="subtitle">— находится по адресу:</div>
+                    </div>
+
+                    <div class="divider-vertical"></div>
+
+                    <div class="info-block">
+                        <div class="address">улица Мира 10, Волгоград, 400066</div>
+                        <div class="coords-label">Координаты:</div>
+                        <div class="coords">48.707317, 44.513696</div>
+                    </div>
+
+                    <div class="info-block">
+                        <div class="hours-label">Рабочие часы</div>
+                    </div>
+
+                    <div class="divider-vertical"></div>
+
+                    <div class="info-block">
+                        <div class="hours">10:00 — 22:00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== BLOCK 7: FAQ ==================== -->
+    <section class="block7" id="block7">
+        <div class="container">
+            <div class="block-header fade-in">
+                <div class="title">FAQ</div>
+            </div>
+
+            <div class="faq-list fade-in fade-in-delay-1">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span class="text">Как забронировать студию?</span>
+                        <div class="faq-icon"></div>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            <p class="text">Выберите подходящую студию в каталоге, укажите дату и время аренды, при необходимости добавьте оборудование и подтвердите бронирование.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span class="text">На какой минимальный срок можно арендовать студию?</span>
+                        <div class="faq-icon"></div>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            <p class="text">Бронирование осуществляется почасово. Минимальный срок аренды составляет 1 час.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span class="text">Можно ли арендовать дополнительное оборудование?</span>
+                        <div class="faq-icon"></div>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            <p class="text">Да. При оформлении бронирования вы можете добавить доступное оборудование: осветительные приборы, камеры, объективы, микрофоны и другие аксессуары.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span class="text">Можно ли арендовать оборудование без студии?</span>
+                        <div class="faq-icon"></div>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            <p class="text">Нет. Дополнительное оборудование предоставляется только при аренде студийного помещения.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span class="text">Как узнать, свободна ли студия?</span>
+                        <div class="faq-icon"></div>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            <p class="text">На странице каждой студии отображается календарь занятости с доступными датами и временными слотами для бронирования.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span class="text">Можно ли изменить или отменить бронирование?</span>
+                        <div class="faq-icon"></div>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            <p class="text">Да. Управление активными бронированиями доступно в личном кабинете пользователя.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span class="text">Можно ли продлить время аренды?</span>
+                        <div class="faq-icon"></div>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            <p class="text">Да. Продление возможно при условии, что выбранная студия свободна на дополнительное время.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span class="text">Что делать, если нужная студия недоступна?</span>
+                        <div class="faq-icon"></div>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="faq-answer-inner">
+                            <p class="text">Вы можете выбрать другую дату, время или воспользоваться каталогом для поиска похожих студий с аналогичными характеристиками.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-top">
+                <div class="footer-logo">АРИРАН</div>
+                <nav class="footer-nav">
+                    <a href="#hero">Главная</a>
+                    <a href="{% url 'studios:catalog' %}">Каталог</a>
+                    <a href="#block2">О нас</a>
+                    <a href="#block7">FAQ</a>
+                    <a href="#block6">Контакты</a>
+                </nav>
+                <div class="footer-contacts">
+                    <a href="tel:+79001234567" class="phone">+7 (900) 123-45-67</a>
+                    <a href="mailto:info@ariran.ru" class="email">info@ariran.ru</a>
+                    <div class="address">ул. Мира 10, Волгоград<br>400066</div>
+                </div>
+            </div>
+            <div class="footer-middle">
+                <div class="footer-social">
+                    <a href="#" class="social-link" aria-label="Telegram">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/></svg>
+                    </a>
+                    <a href="#" class="social-link" aria-label="VK">
+                        <svg viewBox="0 0 24 24"><path d="M12.785 16.241s.288-.032.436-.194c.136-.148.132-.427.132-.427s-.02-1.304.587-1.496c.598-.189 1.366 1.26 2.18 1.817.615.42 1.083.328 1.083.328l2.177-.03s1.14-.07.599-.964c-.044-.073-.314-.661-1.617-1.869-1.364-1.264-1.182-1.059.462-3.246.999-1.332 1.398-2.146 1.273-2.494-.12-.332-.856-.244-.856-.244l-2.45.015s-.182-.025-.317.056c-.131.079-.216.263-.216.263s-.387 1.028-.903 1.903c-1.089 1.848-1.524 1.946-1.703 1.832-.414-.266-.31-1.07-.31-1.64 0-1.783.27-2.52-.527-2.713-.265-.064-.46-.106-1.138-.113-.87-.009-1.608.003-2.024.207-.277.136-.49.44-.36.457.16.021.522.098.714.361.248.34.24 1.103.24 1.103s.142 2.096-.332 2.353c-.326.178-.774-.185-1.738-1.847-.493-.851-.864-1.79-.864-1.79s-.072-.176-.2-.271c-.155-.115-.372-.151-.372-.151l-2.327.015s-.35.01-.478.162c-.114.135-.009.413-.009.413s1.817 4.244 3.874 6.383c1.887 1.963 4.029 1.834 4.029 1.834h.971z"/></svg>
+                    </a>
+                </div>
+                <div class="footer-schedule">
+                    Рабочие часы: <span class="time">10:00 — 22:00</span>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div class="footer-copy">© 2025 Ариран. Все права защищены.</div>
+                <div class="footer-legal">
+                    <a href="#">Политика конфиденциальности</a>
+                    <a href="#">Пользовательское соглашение</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Block 2: Cards animation
+        const cards = document.querySelectorAll('.block2 .card');
+        const nextBtn = document.getElementById('nextBtn');
+        let activeIndex = 1;
+
+        function setActive(index) {
+            cards.forEach(card => card.classList.remove('active'));
+            cards[index].classList.add('active');
+            activeIndex = index;
+        }
+
+        cards.forEach(card => {
+            card.addEventListener('click', () => {
+                const index = parseInt(card.getAttribute('data-index'));
+                setActive(index);
+            });
+        });
+
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                const nextIndex = (activeIndex + 1) % cards.length;
+                setActive(nextIndex);
+            });
+        }
+
+        // Block 3: Categories animation
+        const block3Items = document.querySelectorAll('.block3 .grid-item');
+
+        block3Items.forEach(item => {
+            item.addEventListener('click', () => {
+                if (item.classList.contains('active')) return;
+
+                const activeItem = document.querySelector('.block3 .grid-item.active');
+                const currentPos = item.getAttribute('data-pos');
+
+                item.classList.remove('pos-' + currentPos);
+                item.classList.add('pos-1');
+                activeItem.classList.remove('pos-1');
+                activeItem.classList.add('pos-' + currentPos);
+
+                item.classList.add('active');
+                activeItem.classList.remove('active');
+
+                item.setAttribute('data-pos', '1');
+                activeItem.setAttribute('data-pos', currentPos);
+            });
+        });
+
+        // FAQ Accordion
+        const faqItems = document.querySelectorAll('.block7 .faq-item');
+
+        faqItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const isActive = item.classList.contains('active');
+                faqItems.forEach(i => i.classList.remove('active'));
+                if (!isActive) {
+                    item.classList.add('active');
+                }
+            });
+        });
+    </script>
+{% endblock content %}
+
+{% block footer %}{% endblock footer %}
+
+
+

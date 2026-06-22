@@ -1,0 +1,135 @@
+{% load static %}
+
+{% comment %}
+Home nav/menu для главной страницы.
+ВНИМАНИЕ: в base.html может быть дефолтный nav. На home он должен переопределяться через block nav.
+{% endcomment %}
+<nav class="home-header" id="homeHeader" data-home-nav="true">
+    <div class="container home-header-inner">
+        <div class="logo">АРИРАН</div>
+
+        <nav class="home-nav">
+            <a href="#block2" class="home-nav-link">Главная</a>
+            <a href="#block3" class="home-nav-link">Каталог</a>
+        </nav>
+
+        <a href="{% if user.is_authenticated %}{% url 'studios:profile' %}{% else %}{% url 'studios:login' %}{% endif %}" class="auth">
+            {% if user.is_authenticated %}
+                Профиль
+            {% else %}
+                Авторизация
+            {% endif %}
+            <div class="auth-icon">
+                <img src="{% static 'images/door-icon.png' %}" alt="Авторизация" width="36" height="36">
+            </div>
+        </a>
+    </div>
+</nav>
+
+<style>
+/* Isolated home nav-menu (no dependency on base.html top-nav) */
+.home-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    width:100%;
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    z-index:999;
+    padding:20px 0;
+    transition:all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background:transparent;
+}
+
+.home-header-inner{
+    width:1744px;
+    margin:0 auto;
+    padding:0 88px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:24px;
+}
+
+.home-header.scrolled{
+    background:#788BFF;
+    padding:16px 0;
+}
+
+.home-nav{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:0;
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
+    border:1px solid rgba(255,255,255,0.15);
+    border-radius:50px;
+    padding:10px 28px;
+}
+
+.home-nav-link{
+    color:#fff;
+    font-size:20px;
+    font-weight:bold;
+    margin:0 16px;
+    transition:opacity 0.3s;
+}
+.home-nav-link:hover{ opacity:0.7; }
+
+.logo{
+    font-size:40px;
+    font-weight:bold;
+    color:#fff;
+    letter-spacing:2px;
+    flex-shrink:0;
+}
+
+.auth{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:#fff;
+    font-size:20px;
+    font-weight:bold;
+    flex-shrink:0;
+}
+.auth:hover{ opacity:0.8; }
+.auth-icon{
+    width:36px;
+    height:36px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.auth-icon img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+}
+</style>
+
+<script>
+(function(){
+    // Bind sticky color toggle exactly like provided code
+    const header = document.getElementById('homeHeader');
+    const hero = document.getElementById('hero');
+    if(!header || !hero) return;
+
+    function onScroll(){
+        const heroBottom = hero.offsetTop + hero.offsetHeight;
+        if(window.scrollY > heroBottom - 100){
+            header.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+        }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive:true });
+    onScroll();
+})();
+</script>
+

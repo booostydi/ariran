@@ -1,0 +1,7 @@
+- [ ] Fix NoReverseMatch in admin_panel by adding missing URL patterns for:
+  - [ ] admin_toggle_user
+  - [ ] admin_delete_user
+  - [ ] admin_toggle_studio
+  - [ ] admin_delete_studio
+- [ ] Verify tabs /admin-panel/?tab=users and /admin-panel/?tab=studios render
+- [ ] Restart dev server and re-test flows
