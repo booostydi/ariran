@@ -24,9 +24,10 @@ def admin_studio_add(request):
         form = StudioForm(request.POST)
         if form.is_valid():
             studio = form.save()
-            # Сохраняем фото
-            for f in request.FILES.getlist('photos'):
-                StudioPhoto.objects.create(studio=studio, image=f, order=0)
+            # Сохраняем фото с автоматической нумерацией порядка
+            photos = request.FILES.getlist('photos')
+            for idx, f in enumerate(photos):
+                StudioPhoto.objects.create(studio=studio, image=f, order=idx + 1)
             return redirect('/admin-panel/?tab=studios')
     else:
         form = StudioForm()
@@ -40,13 +41,20 @@ def admin_studio_edit(request, studio_id):
         form = StudioForm(request.POST, instance=studio)
         if form.is_valid():
             form.save()
-            # Новые фото
-            for f in request.FILES.getlist('photos'):
-                StudioPhoto.objects.create(studio=studio, image=f, order=0)
-            # Удаление фото
+            # Сначала удаляем помеченные фото
             delete_photo_ids = request.POST.getlist('delete_photos')
             if delete_photo_ids:
                 StudioPhoto.objects.filter(id__in=delete_photo_ids, studio=studio).delete()
+            # Перенумеровываем оставшиеся существующие фото
+            remaining = list(studio.photos.order_by('order'))
+            for idx, photo in enumerate(remaining):
+                photo.order = idx + 1
+                photo.save(update_fields=['order'])
+            # Добавляем новые фото, нумерация продолжается после существующих
+            new_photos = request.FILES.getlist('photos')
+            start_order = len(remaining) + 1
+            for idx, f in enumerate(new_photos):
+                StudioPhoto.objects.create(studio=studio, image=f, order=start_order + idx)
             return redirect('/admin-panel/?tab=studios')
     else:
         form = StudioForm(instance=studio)
@@ -536,6 +544,82 @@ def admin_panel(request):
     bookings = Booking.objects.select_related('user', 'studio').order_by('-created_at')
     users = User.objects.all().order_by('-created_at')
     studios = Studio.objects.select_related('category', 'interior').order_by('name')
+    categories = Category.objects.all()
+    interiors = Interior.objects.all()
+    equipment_categories = EquipmentCategory.objects.all()
+    equipment_list = Equipment.objects.select_related('category', 'studio').all()
+
+    # Обработка POST-форм для inline-вкладок
+    if request.method == 'POST':
+        action = request.POST.get('_action', '')
+
+        if action == 'category_add':
+            form = CategoryForm(request.POST)
+            if form.is_valid():
+                form.save()
+                return redirect(f'/admin-panel/?tab=categories')
+        elif action.startswith('category_edit_'):
+            pk = int(action.split('_')[-1])
+            obj = get_object_or_404(Category, pk=pk)
+            form = CategoryForm(request.POST, instance=obj)
+            if form.is_valid():
+                form.save()
+                return redirect(f'/admin-panel/?tab=categories')
+        elif action.startswith('category_delete_'):
+            pk = int(action.split('_')[-1])
+            get_object_or_404(Category, pk=pk).delete()
+            return redirect(f'/admin-panel/?tab=categories')
+
+        elif action == 'interior_add':
+            form = InteriorForm(request.POST)
+            if form.is_valid():
+                form.save()
+                return redirect(f'/admin-panel/?tab=interiors')
+        elif action.startswith('interior_edit_'):
+            pk = int(action.split('_')[-1])
+            obj = get_object_or_404(Interior, pk=pk)
+            form = InteriorForm(request.POST, instance=obj)
+            if form.is_valid():
+                form.save()
+                return redirect(f'/admin-panel/?tab=interiors')
+        elif action.startswith('interior_delete_'):
+            pk = int(action.split('_')[-1])
+            get_object_or_404(Interior, pk=pk).delete()
+            return redirect(f'/admin-panel/?tab=interiors')
+
+        elif action == 'eqcat_add':
+            form = EquipmentCategoryForm(request.POST)
+            if form.is_valid():
+                form.save()
+                return redirect(f'/admin-panel/?tab=equipment_categories')
+        elif action.startswith('eqcat_edit_'):
+            pk = int(action.split('_')[-1])
+            obj = get_object_or_404(EquipmentCategory, pk=pk)
+            form = EquipmentCategoryForm(request.POST, instance=obj)
+            if form.is_valid():
+                form.save()
+                return redirect(f'/admin-panel/?tab=equipment_categories')
+        elif action.startswith('eqcat_delete_'):
+            pk = int(action.split('_')[-1])
+            get_object_or_404(EquipmentCategory, pk=pk).delete()
+            return redirect(f'/admin-panel/?tab=equipment_categories')
+
+        elif action == 'equipment_add':
+            form = EquipmentForm(request.POST)
+            if form.is_valid():
+                form.save()
+                return redirect(f'/admin-panel/?tab=equipment')
+        elif action.startswith('equipment_edit_'):
+            pk = int(action.split('_')[-1])
+            obj = get_object_or_404(Equipment, pk=pk)
+            form = EquipmentForm(request.POST, instance=obj)
+            if form.is_valid():
+                form.save()
+                return redirect(f'/admin-panel/?tab=equipment')
+        elif action.startswith('equipment_delete_'):
+            pk = int(action.split('_')[-1])
+            get_object_or_404(Equipment, pk=pk).delete()
+            return redirect(f'/admin-panel/?tab=equipment')
 
     # Статистика
     stats = {
@@ -552,7 +636,16 @@ def admin_panel(request):
         'bookings': bookings,
         'users': users,
         'studios': studios,
+        'categories': categories,
+        'interiors': interiors,
+        'equipment_categories': equipment_categories,
+        'equipment_list': equipment_list,
+        'category_form': CategoryForm(),
+        'interior_form': InteriorForm(),
+        'eqcat_form': EquipmentCategoryForm(),
+        'equipment_form': EquipmentForm(),
         'stats': stats,
+        'edit_id': request.GET.get('edit_id'),
     }
     return render(request, 'studios/admin_panel.html', context)
 

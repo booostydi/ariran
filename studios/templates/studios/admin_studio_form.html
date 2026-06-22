@@ -30,14 +30,58 @@ body { background: #f2f3f7 !important; }
 .adm-section { margin-top: 28px; }
 .adm-section-title { font-size: 15px; font-weight: 700; color: #1a1a1a; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #f0f1f5; }
 
+/* Сетка фото */
 .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-bottom: 16px; }
-.photo-item { position: relative; aspect-ratio: 4/3; border-radius: 10px; overflow: hidden; background: #f0f1f5; }
+.photo-item {
+    position: relative; aspect-ratio: 4/3; border-radius: 10px; overflow: hidden;
+    background: #f0f1f5;
+}
 .photo-item img { width: 100%; height: 100%; object-fit: cover; }
-.photo-delete { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; background: rgba(220,53,69,0.85); border: none; border-radius: 50%; color: #fff; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
+.photo-delete {
+    position: absolute; top: 6px; right: 6px; width: 24px; height: 24px;
+    background: rgba(220,53,69,0.85); border: none; border-radius: 50%;
+    color: #fff; font-size: 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; line-height: 1;
+}
+/* Бейдж с номером порядка */
+.photo-order-badge {
+    position: absolute; bottom: 6px; left: 6px;
+    background: rgba(120,139,255,0.9); color: #fff;
+    font-size: 11px; font-weight: 700; padding: 2px 7px;
+    border-radius: 20px; pointer-events: none;
+}
 
-.adm-file-label { display: inline-block; padding: 10px 20px; background: #f0f1f5; border-radius: 10px; font-size: 14px; color: #555; cursor: pointer; transition: background 0.2s; }
+/* Кнопка добавить фото */
+.adm-file-label {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; background: #f0f1f5; border-radius: 10px;
+    font-size: 14px; color: #555; cursor: pointer; transition: background 0.2s;
+}
 .adm-file-label:hover { background: #e0e1e5; }
 .adm-file-input { display: none; }
+
+/* Превью новых фото */
+.new-photos-grid {
+    display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px;
+}
+.new-photo-item {
+    position: relative; width: 120px; height: 90px;
+    border-radius: 10px; overflow: hidden; background: #f0f1f5;
+    border: 2px solid #788BFF;
+}
+.new-photo-item img { width: 100%; height: 100%; object-fit: cover; }
+.new-photo-remove {
+    position: absolute; top: 4px; right: 4px; width: 22px; height: 22px;
+    background: rgba(220,53,69,0.85); border: none; border-radius: 50%;
+    color: #fff; font-size: 13px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+}
+.new-photo-order-badge {
+    position: absolute; bottom: 4px; left: 4px;
+    background: rgba(120,139,255,0.9); color: #fff;
+    font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 20px;
+}
+.photos-hint { font-size: 12px; color: #aaa; margin-top: 8px; }
 
 .adm-actions { display: flex; gap: 12px; margin-top: 32px; }
 .btn-save { padding: 12px 32px; background: #788BFF; color: #fff; border: none; border-radius: 50px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: Helvetica, Arial, sans-serif; transition: background 0.2s; }
@@ -53,7 +97,7 @@ body { background: #f2f3f7 !important; }
 <div class="adm-page">
     <div class="adm-card">
         <div class="adm-card-title">{{ title }}</div>
-        <form method="post" enctype="multipart/form-data">
+        <form method="post" enctype="multipart/form-data" id="studioForm">
             {% csrf_token %}
             <div class="adm-grid">
                 <div class="adm-field full">
@@ -94,22 +138,35 @@ body { background: #f2f3f7 !important; }
             <!-- Фото -->
             <div class="adm-section">
                 <div class="adm-section-title">Фотографии</div>
+
                 {% if photos %}
-                <div class="photo-grid">
+                {# Существующие фото (при редактировании) #}
+                <div class="photo-grid" id="existingPhotos">
                     {% for photo in photos %}
-                    <div class="photo-item">
+                    <div class="photo-item" id="photo-item-{{ photo.id }}">
                         <img src="{{ photo.image.url }}" alt="Фото">
+                        <span class="photo-order-badge">{{ forloop.counter }}</span>
                         <button type="button" class="photo-delete" onclick="markDelete(this, {{ photo.id }})">×</button>
                         <input type="hidden" name="delete_photos" value="{{ photo.id }}" disabled id="del_{{ photo.id }}">
                     </div>
                     {% endfor %}
                 </div>
                 {% endif %}
-                <label class="adm-file-label">
+
+                {# Превью новых фото (накопительно) #}
+                <div class="new-photos-grid" id="newPhotosPreview"></div>
+
+                {# Скрытый контейнер для хранения файлов #}
+                <div id="fileInputsContainer" style="display:none;"></div>
+
+                <label class="adm-file-label" style="margin-top:12px;">
                     + Добавить фото
-                    <input type="file" name="photos" multiple accept="image/*" class="adm-file-input" id="photoInput">
+                    <input type="file" accept="image/*" class="adm-file-input" id="photoPickerInput" multiple>
                 </label>
-                <div id="photoPreview" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;"></div>
+                <p class="photos-hint">Можно добавлять фото несколько раз — все выбранные фото сохранятся. Порядок нумеруется автоматически.</p>
+
+                {# Скрытое поле для передачи порядка (количество существующих фото, чтобы нумерация продолжалась) #}
+                <input type="hidden" name="existing_photos_count" id="existingPhotosCount" value="{{ photos|length|default:0 }}">
             </div>
 
             <div class="adm-actions">
@@ -123,12 +180,79 @@ body { background: #f2f3f7 !important; }
 
 {% block extra_scripts %}
 <script>
+// Хранилище новых файлов (накопительно)
+let newFiles = [];
+let newFilePreviews = []; // { file, objectUrl }
+
+const pickerInput = document.getElementById('photoPickerInput');
+const previewContainer = document.getElementById('newPhotosPreview');
+const fileInputsContainer = document.getElementById('fileInputsContainer');
+const existingPhotosCount = parseInt(document.getElementById('existingPhotosCount').value) || 0;
+
+// Считаем существующие (не помеченные на удаление) фото для нумерации
+function countExistingActive() {
+    let count = 0;
+    document.querySelectorAll('#existingPhotos .photo-item').forEach(item => {
+        const btn = item.querySelector('.photo-delete');
+        if (btn && btn.textContent.trim() === '×') count++;
+    });
+    return count;
+}
+
+function rebuildPreviews() {
+    previewContainer.innerHTML = '';
+    fileInputsContainer.innerHTML = '';
+
+    newFilePreviews.forEach((entry, idx) => {
+        const orderNum = countExistingActive() + idx + 1;
+
+        // Превью
+        const div = document.createElement('div');
+        div.className = 'new-photo-item';
+        div.innerHTML = `
+            <img src="${entry.objectUrl}" alt="фото">
+            <span class="new-photo-order-badge">${orderNum}</span>
+            <button type="button" class="new-photo-remove" onclick="removeNewPhoto(${idx})">×</button>
+        `;
+        previewContainer.appendChild(div);
+
+        // Реальный input[type=file] для отправки формы
+        // Создаём DataTransfer чтобы положить File в input
+        const dt = new DataTransfer();
+        dt.items.add(entry.file);
+        const inp = document.createElement('input');
+        inp.type = 'file';
+        inp.name = 'photos';
+        inp.accept = 'image/*';
+        inp.files = dt.files;
+        fileInputsContainer.appendChild(inp);
+    });
+}
+
+pickerInput.addEventListener('change', function() {
+    Array.from(this.files).forEach(file => {
+        const objectUrl = URL.createObjectURL(file);
+        newFilePreviews.push({ file, objectUrl });
+    });
+    // Сбрасываем picker чтобы можно было выбрать те же файлы повторно
+    this.value = '';
+    rebuildPreviews();
+});
+
+function removeNewPhoto(idx) {
+    URL.revokeObjectURL(newFilePreviews[idx].objectUrl);
+    newFilePreviews.splice(idx, 1);
+    rebuildPreviews();
+}
+
+// Пометить существующее фото на удаление
 function markDelete(btn, photoId) {
     const input = document.getElementById('del_' + photoId);
     input.disabled = false;
     btn.closest('.photo-item').style.opacity = '0.3';
     btn.textContent = '↩';
     btn.onclick = function() { unmarkDelete(this, photoId); };
+    rebuildPreviews(); // обновляем нумерацию новых
 }
 function unmarkDelete(btn, photoId) {
     const input = document.getElementById('del_' + photoId);
@@ -136,21 +260,7 @@ function unmarkDelete(btn, photoId) {
     btn.closest('.photo-item').style.opacity = '1';
     btn.textContent = '×';
     btn.onclick = function() { markDelete(this, photoId); };
+    rebuildPreviews();
 }
-
-document.getElementById('photoInput').addEventListener('change', function() {
-    const preview = document.getElementById('photoPreview');
-    preview.innerHTML = '';
-    Array.from(this.files).forEach(file => {
-        const reader = new FileReader();
-        reader.onload = e => {
-            const div = document.createElement('div');
-            div.style.cssText = 'width:100px;height:75px;border-radius:8px;overflow:hidden;';
-            div.innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;">`;
-            preview.appendChild(div);
-        };
-        reader.readAsDataURL(file);
-    });
-});
 </script>
 {% endblock %}

@@ -49,6 +49,7 @@ body { background: #f2f3f7 !important; }
 .admin-nav-item { display: block; padding: 12px 18px; font-size: 15px; color: #555; text-decoration: none; border-radius: 10px; transition: all 0.2s; font-weight: 500; }
 .admin-nav-item:hover { background: #f7f8fc; color: #1a1a1a; }
 .admin-nav-item.active { background: #788BFF; color: #fff; font-weight: 600; }
+.admin-nav-divider { height: 1px; background: #f0f1f5; margin: 8px 4px; }
 
 /* Основная область */
 .admin-main { display: flex; flex-direction: column; gap: 16px; }
@@ -74,7 +75,7 @@ body { background: #f2f3f7 !important; }
 .badge-unavailable { background: #f8d7da; color: #721c24; }
 
 /* Кнопки действий */
-.action-btns { display: flex; gap: 8px; align-items: center; }
+.action-btns { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .btn-action { padding: 6px 14px; border: none; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; transition: all 0.2s; font-family: Helvetica, Arial, sans-serif; white-space: nowrap; }
 .btn-confirm  { background: #d4edda; color: #155724; }
 .btn-confirm:hover { background: #c3e6cb; }
@@ -100,6 +101,37 @@ body { background: #f2f3f7 !important; }
 .btn-modal-reject:hover { background: #f5c6cb; }
 
 .empty-state { text-align: center; padding: 40px; color: #aaa; font-size: 15px; }
+
+/* Inline-форма добавления/редактирования */
+.inline-form-card {
+    background: #fafbff;
+    border: 1px solid #e8eaf6;
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+}
+.inline-form-card h4 { font-size: 15px; font-weight: 700; color: #1a1a1a; margin-bottom: 16px; }
+.inline-form-row { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
+.inline-form-row .adm-input,
+.inline-form-row .adm-select,
+.inline-form-row .adm-textarea {
+    padding: 10px 14px; border: 1px solid #e0e0e0; border-radius: 10px;
+    font-family: Helvetica, Arial, sans-serif; font-size: 14px; color: #1a1a1a;
+    outline: none; transition: border-color 0.2s; background: #fff; flex: 1; min-width: 180px;
+}
+.inline-form-row .adm-input:focus,
+.inline-form-row .adm-select:focus,
+.inline-form-row .adm-textarea:focus { border-color: #788BFF; }
+.inline-form-row .adm-textarea { resize: vertical; min-height: 72px; }
+.btn-inline-save { padding: 10px 22px; background: #788BFF; color: #fff; border: none; border-radius: 50px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: Helvetica, Arial, sans-serif; white-space: nowrap; transition: background 0.2s; }
+.btn-inline-save:hover { background: #5a6fd6; }
+.btn-inline-cancel { padding: 10px 18px; background: #f0f1f5; color: #666; border: none; border-radius: 50px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: Helvetica, Arial, sans-serif; white-space: nowrap; text-decoration: none; }
+.btn-inline-cancel:hover { background: #e0e1e5; }
+
+/* Редактирование inline в строке таблицы */
+.edit-row { display: none; background: #fafbff !important; }
+.edit-row.active { display: table-row; }
+.edit-row td { padding: 12px 16px !important; border-bottom: 2px solid #788BFF !important; }
 </style>
 {% endblock %}
 
@@ -142,15 +174,17 @@ body { background: #f2f3f7 !important; }
                 <a href="?tab=bookings" class="admin-nav-item {% if active_tab == 'bookings' %}active{% endif %}">Бронирования</a>
                 <a href="?tab=users"    class="admin-nav-item {% if active_tab == 'users' %}active{% endif %}">Пользователи</a>
                 <a href="?tab=studios"  class="admin-nav-item {% if active_tab == 'studios' %}active{% endif %}">Студии</a>
-                <a href="{% url 'studios:admin_categories' %}"          class="admin-nav-item">Категории</a>
-                <a href="{% url 'studios:admin_interiors' %}"            class="admin-nav-item">Интерьеры</a>
-                <a href="{% url 'studios:admin_equipment_categories' %}" class="admin-nav-item">Кат. оборудования</a>
-                <a href="{% url 'studios:admin_equipment_list' %}"       class="admin-nav-item">Оборудование</a>
+                <div class="admin-nav-divider"></div>
+                <a href="?tab=categories"           class="admin-nav-item {% if active_tab == 'categories' %}active{% endif %}">Категории</a>
+                <a href="?tab=interiors"             class="admin-nav-item {% if active_tab == 'interiors' %}active{% endif %}">Интерьеры</a>
+                <a href="?tab=equipment_categories"  class="admin-nav-item {% if active_tab == 'equipment_categories' %}active{% endif %}">Кат. оборудования</a>
+                <a href="?tab=equipment"             class="admin-nav-item {% if active_tab == 'equipment' %}active{% endif %}">Оборудование</a>
             </nav>
         </aside>
 
         <main class="admin-main">
 
+            {# ===== БРОНИРОВАНИЯ ===== #}
             {% if active_tab == 'bookings' %}
             <div class="admin-card">
                 <div class="admin-card-title">Все бронирования</div>
@@ -200,6 +234,7 @@ body { background: #f2f3f7 !important; }
                 {% endif %}
             </div>
 
+            {# ===== ПОЛЬЗОВАТЕЛИ ===== #}
             {% elif active_tab == 'users' %}
             <div class="admin-card">
                 <div class="admin-card-title">Пользователи</div>
@@ -252,6 +287,7 @@ body { background: #f2f3f7 !important; }
                 {% endif %}
             </div>
 
+            {# ===== СТУДИИ ===== #}
             {% elif active_tab == 'studios' %}
             <div class="admin-card">
                 <div class="admin-card-title" style="display:flex;justify-content:space-between;align-items:center;">
@@ -304,6 +340,289 @@ body { background: #f2f3f7 !important; }
                 <div class="empty-state">Студий нет</div>
                 {% endif %}
             </div>
+
+            {# ===== КАТЕГОРИИ ===== #}
+            {% elif active_tab == 'categories' %}
+            <div class="admin-card">
+                <div class="admin-card-title" style="display:flex;justify-content:space-between;align-items:center;">
+                    Категории
+                    <button class="btn-action btn-primary" onclick="toggleAddForm('add-category-form')">+ Добавить</button>
+                </div>
+
+                <div id="add-category-form" class="inline-form-card" style="display:none;">
+                    <h4>Новая категория</h4>
+                    <form method="post" action="?tab=categories">
+                        {% csrf_token %}
+                        <input type="hidden" name="_action" value="category_add">
+                        <div class="inline-form-row">
+                            <input type="text" name="name" class="adm-input" placeholder="Название" required>
+                            <textarea name="description" class="adm-textarea" placeholder="Описание (необязательно)"></textarea>
+                            <button type="submit" class="btn-inline-save">Сохранить</button>
+                            <button type="button" class="btn-inline-cancel" onclick="toggleAddForm('add-category-form')">Отмена</button>
+                        </div>
+                    </form>
+                </div>
+
+                {% if categories %}
+                <table class="admin-table">
+                    <thead><tr><th>Название</th><th>Описание</th><th>Действия</th></tr></thead>
+                    <tbody>
+                        {% for item in categories %}
+                        <tr id="cat-row-{{ item.pk }}">
+                            <td><strong>{{ item.name }}</strong></td>
+                            <td style="color:#888;">{{ item.description|truncatechars:60|default:"—" }}</td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-action btn-toggle" onclick="toggleEditRow('cat-edit-{{ item.pk }}')">Редактировать</button>
+                                    <form method="post" action="?tab=categories" style="display:inline;" onsubmit="return confirm('Удалить «{{ item.name }}»?')">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="_action" value="category_delete_{{ item.pk }}">
+                                        <button type="submit" class="btn-action btn-delete">Удалить</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr id="cat-edit-{{ item.pk }}" class="edit-row">
+                            <td colspan="3">
+                                <form method="post" action="?tab=categories">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="_action" value="category_edit_{{ item.pk }}">
+                                    <div class="inline-form-row">
+                                        <input type="text" name="name" class="adm-input" value="{{ item.name }}" required>
+                                        <textarea name="description" class="adm-textarea" placeholder="Описание">{{ item.description }}</textarea>
+                                        <button type="submit" class="btn-inline-save">Сохранить</button>
+                                        <button type="button" class="btn-inline-cancel" onclick="toggleEditRow('cat-edit-{{ item.pk }}')">Отмена</button>
+                                    </div>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="empty-state">Категорий нет</div>
+                {% endif %}
+            </div>
+
+            {# ===== ИНТЕРЬЕРЫ ===== #}
+            {% elif active_tab == 'interiors' %}
+            <div class="admin-card">
+                <div class="admin-card-title" style="display:flex;justify-content:space-between;align-items:center;">
+                    Интерьеры
+                    <button class="btn-action btn-primary" onclick="toggleAddForm('add-interior-form')">+ Добавить</button>
+                </div>
+
+                <div id="add-interior-form" class="inline-form-card" style="display:none;">
+                    <h4>Новый интерьер</h4>
+                    <form method="post" action="?tab=interiors">
+                        {% csrf_token %}
+                        <input type="hidden" name="_action" value="interior_add">
+                        <div class="inline-form-row">
+                            <input type="text" name="name" class="adm-input" placeholder="Название" required>
+                            <textarea name="description" class="adm-textarea" placeholder="Описание (необязательно)"></textarea>
+                            <button type="submit" class="btn-inline-save">Сохранить</button>
+                            <button type="button" class="btn-inline-cancel" onclick="toggleAddForm('add-interior-form')">Отмена</button>
+                        </div>
+                    </form>
+                </div>
+
+                {% if interiors %}
+                <table class="admin-table">
+                    <thead><tr><th>Название</th><th>Описание</th><th>Действия</th></tr></thead>
+                    <tbody>
+                        {% for item in interiors %}
+                        <tr>
+                            <td><strong>{{ item.name }}</strong></td>
+                            <td style="color:#888;">{{ item.description|truncatechars:60|default:"—" }}</td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-action btn-toggle" onclick="toggleEditRow('int-edit-{{ item.pk }}')">Редактировать</button>
+                                    <form method="post" action="?tab=interiors" style="display:inline;" onsubmit="return confirm('Удалить «{{ item.name }}»?')">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="_action" value="interior_delete_{{ item.pk }}">
+                                        <button type="submit" class="btn-action btn-delete">Удалить</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr id="int-edit-{{ item.pk }}" class="edit-row">
+                            <td colspan="3">
+                                <form method="post" action="?tab=interiors">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="_action" value="interior_edit_{{ item.pk }}">
+                                    <div class="inline-form-row">
+                                        <input type="text" name="name" class="adm-input" value="{{ item.name }}" required>
+                                        <textarea name="description" class="adm-textarea" placeholder="Описание">{{ item.description }}</textarea>
+                                        <button type="submit" class="btn-inline-save">Сохранить</button>
+                                        <button type="button" class="btn-inline-cancel" onclick="toggleEditRow('int-edit-{{ item.pk }}')">Отмена</button>
+                                    </div>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="empty-state">Интерьеров нет</div>
+                {% endif %}
+            </div>
+
+            {# ===== КАТЕГОРИИ ОБОРУДОВАНИЯ ===== #}
+            {% elif active_tab == 'equipment_categories' %}
+            <div class="admin-card">
+                <div class="admin-card-title" style="display:flex;justify-content:space-between;align-items:center;">
+                    Категории оборудования
+                    <button class="btn-action btn-primary" onclick="toggleAddForm('add-eqcat-form')">+ Добавить</button>
+                </div>
+
+                <div id="add-eqcat-form" class="inline-form-card" style="display:none;">
+                    <h4>Новая категория оборудования</h4>
+                    <form method="post" action="?tab=equipment_categories">
+                        {% csrf_token %}
+                        <input type="hidden" name="_action" value="eqcat_add">
+                        <div class="inline-form-row">
+                            <input type="text" name="name" class="adm-input" placeholder="Название" required>
+                            <button type="submit" class="btn-inline-save">Сохранить</button>
+                            <button type="button" class="btn-inline-cancel" onclick="toggleAddForm('add-eqcat-form')">Отмена</button>
+                        </div>
+                    </form>
+                </div>
+
+                {% if equipment_categories %}
+                <table class="admin-table">
+                    <thead><tr><th>Название</th><th>Действия</th></tr></thead>
+                    <tbody>
+                        {% for item in equipment_categories %}
+                        <tr>
+                            <td><strong>{{ item.name }}</strong></td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-action btn-toggle" onclick="toggleEditRow('eqcat-edit-{{ item.pk }}')">Редактировать</button>
+                                    <form method="post" action="?tab=equipment_categories" style="display:inline;" onsubmit="return confirm('Удалить «{{ item.name }}»?')">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="_action" value="eqcat_delete_{{ item.pk }}">
+                                        <button type="submit" class="btn-action btn-delete">Удалить</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr id="eqcat-edit-{{ item.pk }}" class="edit-row">
+                            <td colspan="2">
+                                <form method="post" action="?tab=equipment_categories">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="_action" value="eqcat_edit_{{ item.pk }}">
+                                    <div class="inline-form-row">
+                                        <input type="text" name="name" class="adm-input" value="{{ item.name }}" required>
+                                        <button type="submit" class="btn-inline-save">Сохранить</button>
+                                        <button type="button" class="btn-inline-cancel" onclick="toggleEditRow('eqcat-edit-{{ item.pk }}')">Отмена</button>
+                                    </div>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="empty-state">Категорий оборудования нет</div>
+                {% endif %}
+            </div>
+
+            {# ===== ОБОРУДОВАНИЕ ===== #}
+            {% elif active_tab == 'equipment' %}
+            <div class="admin-card">
+                <div class="admin-card-title" style="display:flex;justify-content:space-between;align-items:center;">
+                    Оборудование
+                    <button class="btn-action btn-primary" onclick="toggleAddForm('add-equipment-form')">+ Добавить</button>
+                </div>
+
+                <div id="add-equipment-form" class="inline-form-card" style="display:none;">
+                    <h4>Новое оборудование</h4>
+                    <form method="post" action="?tab=equipment">
+                        {% csrf_token %}
+                        <input type="hidden" name="_action" value="equipment_add">
+                        <div class="inline-form-row">
+                            <input type="text" name="name" class="adm-input" placeholder="Название" required>
+                            <select name="category" class="adm-select">
+                                <option value="">— Категория —</option>
+                                {% for ec in equipment_categories %}
+                                <option value="{{ ec.pk }}">{{ ec.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <select name="studio" class="adm-select">
+                                <option value="">— Студия —</option>
+                                {% for s in studios %}
+                                <option value="{{ s.pk }}">{{ s.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#555;white-space:nowrap;">
+                                <input type="checkbox" name="is_available" checked style="accent-color:#788BFF;"> Доступно
+                            </label>
+                            <button type="submit" class="btn-inline-save">Сохранить</button>
+                            <button type="button" class="btn-inline-cancel" onclick="toggleAddForm('add-equipment-form')">Отмена</button>
+                        </div>
+                    </form>
+                </div>
+
+                {% if equipment_list %}
+                <table class="admin-table">
+                    <thead><tr><th>Название</th><th>Категория</th><th>Студия</th><th>Доступно</th><th>Действия</th></tr></thead>
+                    <tbody>
+                        {% for item in equipment_list %}
+                        <tr>
+                            <td><strong>{{ item.name }}</strong></td>
+                            <td>{{ item.category.name|default:"—" }}</td>
+                            <td>{{ item.studio.name|default:"—" }}</td>
+                            <td>
+                                <span class="badge {% if item.is_available %}badge-available{% else %}badge-unavailable{% endif %}">
+                                    {% if item.is_available %}Да{% else %}Нет{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn-action btn-toggle" onclick="toggleEditRow('eq-edit-{{ item.pk }}')">Редактировать</button>
+                                    <form method="post" action="?tab=equipment" style="display:inline;" onsubmit="return confirm('Удалить «{{ item.name }}»?')">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="_action" value="equipment_delete_{{ item.pk }}">
+                                        <button type="submit" class="btn-action btn-delete">Удалить</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr id="eq-edit-{{ item.pk }}" class="edit-row">
+                            <td colspan="5">
+                                <form method="post" action="?tab=equipment">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="_action" value="equipment_edit_{{ item.pk }}">
+                                    <div class="inline-form-row">
+                                        <input type="text" name="name" class="adm-input" value="{{ item.name }}" required>
+                                        <select name="category" class="adm-select">
+                                            <option value="">— Категория —</option>
+                                            {% for ec in equipment_categories %}
+                                            <option value="{{ ec.pk }}" {% if item.category_id == ec.pk %}selected{% endif %}>{{ ec.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <select name="studio" class="adm-select">
+                                            <option value="">— Студия —</option>
+                                            {% for s in studios %}
+                                            <option value="{{ s.pk }}" {% if item.studio_id == s.pk %}selected{% endif %}>{{ s.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#555;white-space:nowrap;">
+                                            <input type="checkbox" name="is_available" {% if item.is_available %}checked{% endif %} style="accent-color:#788BFF;"> Доступно
+                                        </label>
+                                        <button type="submit" class="btn-inline-save">Сохранить</button>
+                                        <button type="button" class="btn-inline-cancel" onclick="toggleEditRow('eq-edit-{{ item.pk }}')">Отмена</button>
+                                    </div>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="empty-state">Оборудования нет</div>
+                {% endif %}
+            </div>
             {% endif %}
 
         </main>
@@ -338,5 +657,19 @@ function closeRejectModal() {
 document.getElementById('rejectModal').addEventListener('click', function(e) {
     if (e.target === this) closeRejectModal();
 });
+
+function toggleAddForm(id) {
+    const el = document.getElementById(id);
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function toggleEditRow(id) {
+    const row = document.getElementById(id);
+    if (!row) return;
+    const isActive = row.classList.contains('active');
+    // Закрываем все открытые строки редактирования
+    document.querySelectorAll('.edit-row.active').forEach(r => r.classList.remove('active'));
+    if (!isActive) row.classList.add('active');
+}
 </script>
 {% endblock %}
