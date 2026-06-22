@@ -440,6 +440,14 @@ a {
     font-size: 128px;
 }
 
+.text-center, .number-center{
+    text-align:center;
+}
+
+.text-right, .number-right{
+    text-align:right;
+}
+
 /* ===== BLOCK 3: КАТЕГОРИИ ===== */
 .block3 {
     width: 100%;
@@ -1327,13 +1335,59 @@ a {
 }
 
 .sort-wrapper select {
-    padding: 8px 16px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    padding: 12px 36px 12px 14px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
     font-size: 14px;
     font-family: 'Helvetica', sans-serif;
     background: #fff;
     cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+    transition: border-color 0.2s;
+    background-image: none;
+}
+
+/* Sort select (похоже на filter-select-wrapper) */
+.sort-wrapper .filter-select-wrapper {
+    min-width: 210px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+
+.filter-select-wrapper::after {
+    content: '';
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #888;
+    pointer-events: none;
+    /* чтобы стрелка не выезжала за селектор */
+    display: block;
+    z-index: 1;
+}
+
+/* надёжно ограничиваем обёртку, где рисуется стрелка */
+.filter-select-wrapper {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+
+
+
+.catalog-topbar .sort-wrapper {
+    position: relative;
 }
 
 /* Studios Grid */
@@ -1998,12 +2052,33 @@ a {
     font-weight: 500;
     cursor: pointer;
     outline: none;
-    padding-right: 18px;
     appearance: none;
     -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0 center;
+    background-image: none;
+    padding-right: 0;
+    width: 100%;
+}
+
+/* Стрелка сортировки внутри select-обёртки */
+.sort-wrapper .filter-select-wrapper {
+    position: relative;
+    overflow: hidden;
+}
+
+.sort-wrapper .filter-select-wrapper::after {
+    content: '';
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #888;
+    pointer-events: none;
+    display: block;
+    z-index: 1;
 }
 
 /* ===== STUDIO GRID ===== */
@@ -2035,6 +2110,83 @@ a {
     background: #f5f5f5;
 }
 
+/* Mini slider for catalog cards (images carousel) */
+.card-slider{
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.card-slider .slider-track{
+    display: flex;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.35s ease;
+    transform: translateX(0%);
+}
+
+.card-slider .slider-slide{
+    min-width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.card-slider .slider-slide img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.card-slider .slider-arrow{
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.85);
+    color: #1a1a1a;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.card-slider .slider-arrow:hover{
+    background: rgba(255,255,255,1);
+    transform: translateY(-50%) scale(1.06);
+}
+
+.card-slider .slider-arrow.prev{ left: 12px; }
+.card-slider .slider-arrow.next{ right: 12px; }
+
+.card-slider .slider-arrow svg{
+    width: 18px;
+    height: 18px;
+}
+
+.card-slider .slider-counter{
+    position: absolute;
+    left: 12px;
+    bottom: 10px;
+    z-index: 6;
+    background: rgba(0,0,0,0.35);
+    color: #fff;
+    border-radius: 10px;
+    padding: 6px 10px;
+    font-size: 14px;
+    font-weight: 600;
+    backdrop-filter: blur(4px);
+}
+
+.card-slider .slider-current{ color: #fff; }
+.card-slider .slider-total{ color: rgba(255,255,255,0.9); }
+
+
 .card-image-wrapper img {
     width: 100%;
     height: 100%;
@@ -2042,6 +2194,16 @@ a {
     display: block;
     transition: transform 0.4s ease;
 }
+
+/* Чтобы карточки-слайдеры листались только стрелками, без "скрола вниз" */
+.card-slider{
+    touch-action: pan-y;
+}
+
+.card-slider .slider-track{
+    will-change: transform;
+}
+
 
 .studio-card:hover .card-image-wrapper img {
     transform: scale(1.04);

@@ -24,10 +24,41 @@ def admin_studio_add(request):
         form = StudioForm(request.POST)
         if form.is_valid():
             studio = form.save()
-            # Сохраняем фото с автоматической нумерацией порядка
+
+            # Если форма прислала порядок для новых фото (new_photo_order[]),
+            # то сервер должен создать StudioPhoto в том порядке.
+            # new_photo_order[] формат: "<file_index>:<order>".
+            new_photo_order_raw = request.POST.getlist('new_photo_order[]')
             photos = request.FILES.getlist('photos')
-            for idx, f in enumerate(photos):
-                StudioPhoto.objects.create(studio=studio, image=f, order=idx + 1)
+
+            if new_photo_order_raw:
+                parsed = []
+                for item in new_photo_order_raw:
+                    try:
+                        file_idx_str, order_str = item.split(':', 1)
+                        parsed.append((int(file_idx_str), int(order_str)))
+                    except ValueError:
+                        continue
+
+                # сортируем по order и вытаскиваем файлы по file_index
+                parsed.sort(key=lambda x: x[1])
+                ordered_files = []
+                for file_idx, _order in parsed:
+                    if 0 <= file_idx < len(photos):
+                        ordered_files.append(photos[file_idx])
+
+                # если что-то не распарсилось — fallback на исходный порядок
+                if ordered_files and len(ordered_files) == len(photos):
+                    for idx, f in enumerate(ordered_files):
+                        StudioPhoto.objects.create(studio=studio, image=f, order=idx + 1)
+                else:
+                    for idx, f in enumerate(photos):
+                        StudioPhoto.objects.create(studio=studio, image=f, order=idx + 1)
+            else:
+                # стандартно: порядок как пришёл список файлов
+                for idx, f in enumerate(photos):
+                    StudioPhoto.objects.create(studio=studio, image=f, order=idx + 1)
+
             return redirect('/admin-panel/?tab=studios')
     else:
         form = StudioForm()
@@ -45,16 +76,44 @@ def admin_studio_edit(request, studio_id):
             delete_photo_ids = request.POST.getlist('delete_photos')
             if delete_photo_ids:
                 StudioPhoto.objects.filter(id__in=delete_photo_ids, studio=studio).delete()
-            # Перенумеровываем оставшиеся существующие фото
-            remaining = list(studio.photos.order_by('order'))
-            for idx, photo in enumerate(remaining):
-                photo.order = idx + 1
-                photo.save(update_fields=['order'])
-            # Добавляем новые фото, нумерация продолжается после существующих
+            # 1) Удаляем помеченные фото
+            # (логика удаления выше)
+
+            # 2) Обновляем порядок существующих фото по данным с формы
+            # photo_order[] приходит как список строк вида: "<photo_id>:<order>"
+            photo_order_raw = request.POST.getlist('photo_order[]')
+            if photo_order_raw:
+                parsed = []
+                for item in photo_order_raw:
+                    try:
+                        photo_id_str, order_str = item.split(':', 1)
+                        parsed.append((int(photo_id_str), int(order_str)))
+                    except ValueError:
+                        continue
+
+                # применяем только для фото этого студии
+                for photo_id, new_order in parsed:
+                    StudioPhoto.objects.filter(id=photo_id, studio=studio).update(order=new_order)
+
+                # гарантируем плотную нумерацию 1..N (важно если пришли пропуски)
+                remaining = list(studio.photos.exclude(id__in=delete_photo_ids).order_by('order', 'id'))
+                for idx, photo in enumerate(remaining):
+                    photo.order = idx + 1
+                    photo.save(update_fields=['order'])
+            else:
+                # fallback: старое поведение (если по какой-то причине photo_order[] не пришёл)
+                remaining = list(studio.photos.order_by('order'))
+                for idx, photo in enumerate(remaining):
+                    photo.order = idx + 1
+                    photo.save(update_fields=['order'])
+
+            # 3) Добавляем новые фото, нумерация продолжается после существующих
+            remaining_count = studio.photos.exclude(id__in=delete_photo_ids).count()
             new_photos = request.FILES.getlist('photos')
-            start_order = len(remaining) + 1
+            start_order = remaining_count + 1
             for idx, f in enumerate(new_photos):
                 StudioPhoto.objects.create(studio=studio, image=f, order=start_order + idx)
+
             return redirect('/admin-panel/?tab=studios')
     else:
         form = StudioForm(instance=studio)

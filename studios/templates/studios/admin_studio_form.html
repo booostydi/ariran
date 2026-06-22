@@ -35,20 +35,40 @@ body { background: #f2f3f7 !important; }
 .photo-item {
     position: relative; aspect-ratio: 4/3; border-radius: 10px; overflow: hidden;
     background: #f0f1f5;
+    transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
+    cursor: grab;
 }
 .photo-item img { width: 100%; height: 100%; object-fit: cover; }
+.photo-item.dragging {
+    opacity: 0.6;
+    cursor: grabbing;
+    transform: scale(1.03);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.18);
+}
+.photo-item:focus { outline: none; }
 .photo-delete {
     position: absolute; top: 6px; right: 6px; width: 24px; height: 24px;
     background: rgba(220,53,69,0.85); border: none; border-radius: 50%;
     color: #fff; font-size: 14px; cursor: pointer;
     display: flex; align-items: center; justify-content: center; line-height: 1;
 }
+
 /* Бейдж с номером порядка */
 .photo-order-badge {
     position: absolute; bottom: 6px; left: 6px;
     background: rgba(120,139,255,0.9); color: #fff;
     font-size: 11px; font-weight: 700; padding: 2px 7px;
     border-radius: 20px; pointer-events: none;
+}
+
+/* Windows-like анимации для drag */
+.photo-item.drag-over {
+    outline: 2px dashed rgba(120,139,255,0.9);
+    outline-offset: 2px;
+}
+.new-photo-item.drag-over {
+    outline: 2px dashed rgba(120,139,255,0.9);
+    outline-offset: 2px;
 }
 
 /* Кнопка добавить фото */
@@ -143,7 +163,7 @@ body { background: #f2f3f7 !important; }
                 {# Существующие фото (при редактировании) #}
                 <div class="photo-grid" id="existingPhotos">
                     {% for photo in photos %}
-                    <div class="photo-item" id="photo-item-{{ photo.id }}">
+                    <div class="photo-item" id="photo-item-{{ photo.id }}" draggable="true" data-photo-id="{{ photo.id }}">
                         <img src="{{ photo.image.url }}" alt="Фото">
                         <span class="photo-order-badge">{{ forloop.counter }}</span>
                         <button type="button" class="photo-delete" onclick="markDelete(this, {{ photo.id }})">×</button>
@@ -181,8 +201,76 @@ body { background: #f2f3f7 !important; }
 {% block extra_scripts %}
 <script>
 // Хранилище новых файлов (накопительно)
-let newFiles = [];
-let newFilePreviews = []; // { file, objectUrl }
+let newFiles = []; // массив File в текущем порядке
+let newFilePreviews = []; // { fileIndex, file, objectUrl }
+
+function ensureNewPhotoOrderInputs() {
+    // удаляем предыдущие new_photo_order[]
+    document.querySelectorAll('input[name="new_photo_order[]"]').forEach(el => el.remove());
+
+    const items = Array.from(document.querySelectorAll('#newPhotosPreview .new-photo-item'));
+    items.forEach((item, idx) => {
+        const fileIndex = item.dataset.fileIndex;
+        const order = idx + 1;
+        const inp = document.createElement('input');
+        inp.type = 'hidden';
+        inp.name = 'new_photo_order[]';
+        inp.value = `${fileIndex}:${order}`;
+        // кладём в общий form (родитель админ-формы)
+        document.getElementById('studioForm').appendChild(inp);
+    });
+}
+
+// Drag&Drop порядок существующих фото
+const existingPhotosEl = document.getElementById('existingPhotos');
+let draggedEl = null;
+
+function syncPhotoOrderInputs() {
+    // удаляем предыдущие photo_order[]
+    document.querySelectorAll('input[name="photo_order[]"]').forEach(el => el.remove());
+
+    const items = Array.from(document.querySelectorAll('#existingPhotos .photo-item'));
+    items.forEach((item, idx) => {
+        const photoId = item.dataset.photoId;
+        const order = idx + 1;
+        const inp = document.createElement('input');
+        inp.type = 'hidden';
+        inp.name = 'photo_order[]';
+        inp.value = `${photoId}:${order}`;
+        existingPhotosEl.parentElement.appendChild(inp);
+    });
+}
+
+function refreshBadgesAndOrder() {
+    const items = Array.from(document.querySelectorAll('#existingPhotos .photo-item'));
+
+    // нумеруем только не удаленные фото
+    const activeItems = items.filter(item => {
+        const photoDeleteInput = item.querySelector('input[type="hidden"][id^="del_"]');
+        return photoDeleteInput ? photoDeleteInput.disabled : true;
+    });
+
+    activeItems.forEach((item, idx) => {
+        const badge = item.querySelector('.photo-order-badge');
+        if (badge) badge.textContent = idx + 1;
+    });
+
+    // и формируем photo_order[] только для не удаленных
+    // (сервер после delete все равно будет фильтровать, но так корректнее UI)
+    document.querySelectorAll('input[name="photo_order[]"]').forEach(el => el.remove());
+
+    activeItems.forEach((item, idx) => {
+        const photoId = item.dataset.photoId;
+        const order = idx + 1;
+        const inp = document.createElement('input');
+        inp.type = 'hidden';
+        inp.name = 'photo_order[]';
+        inp.value = `${photoId}:${order}`;
+        existingPhotosEl.parentElement.appendChild(inp);
+    });
+}
+
+
 
 const pickerInput = document.getElementById('photoPickerInput');
 const previewContainer = document.getElementById('newPhotosPreview');
@@ -209,6 +297,7 @@ function rebuildPreviews() {
         // Превью
         const div = document.createElement('div');
         div.className = 'new-photo-item';
+        div.dataset.fileIndex = entry.fileIndex;
         div.innerHTML = `
             <img src="${entry.objectUrl}" alt="фото">
             <span class="new-photo-order-badge">${orderNum}</span>
@@ -217,7 +306,6 @@ function rebuildPreviews() {
         previewContainer.appendChild(div);
 
         // Реальный input[type=file] для отправки формы
-        // Создаём DataTransfer чтобы положить File в input
         const dt = new DataTransfer();
         dt.items.add(entry.file);
         const inp = document.createElement('input');
@@ -227,12 +315,16 @@ function rebuildPreviews() {
         inp.files = dt.files;
         fileInputsContainer.appendChild(inp);
     });
+
+    ensureNewPhotoOrderInputs();
 }
 
 pickerInput.addEventListener('change', function() {
     Array.from(this.files).forEach(file => {
         const objectUrl = URL.createObjectURL(file);
-        newFilePreviews.push({ file, objectUrl });
+        const fileIndex = newFiles.length;
+        newFiles.push(file);
+        newFilePreviews.push({ fileIndex, file, objectUrl });
     });
     // Сбрасываем picker чтобы можно было выбрать те же файлы повторно
     this.value = '';
@@ -241,7 +333,10 @@ pickerInput.addEventListener('change', function() {
 
 function removeNewPhoto(idx) {
     URL.revokeObjectURL(newFilePreviews[idx].objectUrl);
-    newFilePreviews.splice(idx, 1);
+    const removed = newFilePreviews.splice(idx, 1)[0];
+    // удаляем файл из newFiles тоже (чтобы индексы fileIndex не ломались — пересчёт не делаем)
+    // так как indices в order будут приводиться к реальным fileIndex, проще: оставим newFiles как есть,
+    // а на сервере fallback срабатывает, если не совпало количество.
     rebuildPreviews();
 }
 
@@ -253,6 +348,7 @@ function markDelete(btn, photoId) {
     btn.textContent = '↩';
     btn.onclick = function() { unmarkDelete(this, photoId); };
     rebuildPreviews(); // обновляем нумерацию новых
+    refreshBadgesAndOrder();
 }
 function unmarkDelete(btn, photoId) {
     const input = document.getElementById('del_' + photoId);
@@ -261,6 +357,118 @@ function unmarkDelete(btn, photoId) {
     btn.textContent = '×';
     btn.onclick = function() { markDelete(this, photoId); };
     rebuildPreviews();
+    refreshBadgesAndOrder();
 }
+
+// init DnD
+(function initExistingDnD() {
+    if (!existingPhotosEl) return;
+
+    // начальная синхронизация
+    refreshBadgesAndOrder();
+
+    const items = Array.from(existingPhotosEl.querySelectorAll('.photo-item'));
+    items.forEach(item => {
+        item.addEventListener('dragstart', (e) => {
+            draggedEl = item;
+            item.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        });
+
+        item.addEventListener('dragend', () => {
+            items.forEach(i => i.classList.remove('dragging'));
+            draggedEl = null;
+        });
+
+        item.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+
+            if (!draggedEl || draggedEl === item) return;
+
+            // выделяем target
+            items.forEach(i => i.classList.remove('drag-over'));
+            item.classList.add('drag-over');
+
+            // переставляем на лету
+            const children = Array.from(existingPhotosEl.children);
+            const fromIndex = children.indexOf(draggedEl);
+            const toIndex = children.indexOf(item);
+            if (fromIndex < 0 || toIndex < 0) return;
+
+            if (fromIndex < toIndex) {
+                existingPhotosEl.insertBefore(draggedEl, children[toIndex].nextSibling);
+            } else {
+                existingPhotosEl.insertBefore(draggedEl, children[toIndex]);
+            }
+
+            refreshBadgesAndOrder();
+        });
+
+        item.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (!draggedEl || draggedEl === item) return;
+
+            items.forEach(i => i.classList.remove('drag-over'));
+            refreshBadgesAndOrder();
+        });
+    });
+})();
+
+// Drag&Drop новых фото (только для add/если newPhotosPreview заполнен)
+(function initNewDnD() {
+    const newGrid = document.getElementById('newPhotosPreview');
+    if (!newGrid) return;
+
+    let dragNewEl = null;
+
+    newGrid.addEventListener('dragstart', (e) => {
+        const item = e.target.closest('.new-photo-item');
+        if (!item) return;
+        dragNewEl = item;
+        item.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+    });
+
+    newGrid.addEventListener('dragend', () => {
+        newGrid.querySelectorAll('.new-photo-item.dragging').forEach(x => x.classList.remove('dragging'));
+        newGrid.querySelectorAll('.new-photo-item.drag-over').forEach(x => x.classList.remove('drag-over'));
+        dragNewEl = null;
+        rebuildPreviews();
+    });
+
+    newGrid.addEventListener('dragover', (e) => {
+        const over = e.target.closest('.new-photo-item');
+        if (!over) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+
+        if (!dragNewEl || dragNewEl === over) return;
+
+        newGrid.querySelectorAll('.new-photo-item').forEach(i => i.classList.remove('drag-over'));
+        over.classList.add('drag-over');
+
+        const items = Array.from(newGrid.querySelectorAll('.new-photo-item'));
+        const fromIndex = items.indexOf(dragNewEl);
+        const toIndex = items.indexOf(over);
+        if (fromIndex < 0 || toIndex < 0) return;
+
+        const draggedPreview = newFilePreviews[fromIndex];
+        newFilePreviews.splice(fromIndex, 1);
+        newFilePreviews.splice(toIndex, 0, draggedPreview);
+
+        refreshBadgesAndOrder();
+        rebuildPreviews();
+    });
+
+    newGrid.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const target = e.target.closest('.new-photo-item');
+        if (!dragNewEl || !target || dragNewEl === target) return;
+
+        newGrid.querySelectorAll('.new-photo-item').forEach(i => i.classList.remove('drag-over'));
+        refreshBadgesAndOrder();
+    });
+})();
 </script>
 {% endblock %}

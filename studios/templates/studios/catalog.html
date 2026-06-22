@@ -105,29 +105,56 @@
                 <div class="catalog-count">Найдено: <strong>{{ studios|length }} студии</strong></div>
                 <div class="sort-wrapper">
                     Сортировать по:
-                    <select class="sort-select" id="sortSelect">
-                        <option value="name" {% if sort == 'name' %}selected{% endif %}>названию</option>
-                        <option value="-name" {% if sort == '-name' %}selected{% endif %}>названию ↓</option>
-                        <option value="price" {% if sort == 'price' %}selected{% endif %}>цене ↑</option>
-                        <option value="-price" {% if sort == '-price' %}selected{% endif %}>цене ↓</option>
-                    </select>
+                    <div class="filter-select-wrapper">
+                        <select class="sort-select" id="sortSelect">
+                            <option value="name" {% if sort == 'name' %}selected{% endif %}>названию</option>
+                            <option value="-name" {% if sort == '-name' %}selected{% endif %}>названию ↓</option>
+                            <option value="price" {% if sort == 'price' %}selected{% endif %}>цене ↑</option>
+                            <option value="-price" {% if sort == '-price' %}selected{% endif %}>цене ↓</option>
+                        </select>
+                    </div>
                 </div>
+
             </div>
 
-            <div class="studios-grid" id="studiosGrid">
+<div class="studios-grid" id="studiosGrid">
                 {% for studio in studios %}
                 <div class="studio-card">
                     <div class="card-image-wrapper">
-                        {% if studio.photos.first %}
-                            <img src="{{ studio.photos.first.image.url }}" alt="{{ studio.name }}" loading="lazy">
+                        {% if studio.photos.exists %}
+                            <div class="card-slider" data-total="{{ studio.photos.count }}">
+                                <div class="slider-track">
+                                    {% for photo in studio.photos.all %}
+                                        <div class="slider-slide">
+                                            <img src="{{ photo.image.url }}" alt="{{ studio.name }}" loading="lazy">
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <button type="button" class="slider-arrow prev" aria-label="Предыдущее фото">
+                                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                                        <polyline points="15 18 9 12 15 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                                <button type="button" class="slider-arrow next" aria-label="Следующее фото">
+                                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                                        <polyline points="9 18 15 12 9 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+
+                                <div class="slider-counter" aria-label="Номер фото">
+                                    <span class="slider-current">1</span>/<span class="slider-total">{{ studio.photos.count }}</span>
+                                </div>
+                            </div>
                         {% else %}
                             <img src="{% static 'images/empty-image.png' %}" alt="Нет фото" loading="lazy">
                         {% endif %}
+
                         <!-- Кнопка избранного -->
                         {% if user.is_authenticated %}
                         <button class="favorite-btn {% if studio.id in user_favorites %}is-favorite{% endif %}" 
                                 data-studio-id="{{ studio.id }}" 
-                                onclick="toggleFavorite(event, this)" 
+                                onclick="toggleFavorite(event, this)"
                                 type="button"
                                 aria-label="В избранное">
                             <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
@@ -136,8 +163,10 @@
                         </button>
                         {% endif %}
                     </div>
+
+
                     <div class="card-body">
-                        <div class="card-name">{{ studio.name }}</div>
+                        <a href="{% url 'studios:studio_detail' studio.pk %}" class="card-name" aria-label="Перейти на страницу студии">{{ studio.name }}</a>
                         <div class="card-category">{{ studio.get_type_display }}</div>
                         <div class="card-meta">
                             <div class="card-meta-item">
@@ -194,6 +223,8 @@ function getCookie(name) {
 }
 
 window.toggleFavorite = function(event, btn) {
+    // не даём скроллу/клику по слайдеру сработать
+
     event.preventDefault();
     event.stopPropagation();
 
@@ -451,6 +482,63 @@ if (cards.length > VISIBLE_COUNT) {
         });
     }
 }
+
+// ===== CATALOG CARD SLIDERS (arrows + counter) =====
+(function initCatalogCardSliders() {
+    const sliders = document.querySelectorAll('.card-slider');
+    sliders.forEach((slider) => {
+        const track = slider.querySelector('.slider-track');
+        const slides = Array.from(slider.querySelectorAll('.slider-slide'));
+        const prevBtn = slider.querySelector('.slider-arrow.prev');
+        const nextBtn = slider.querySelector('.slider-arrow.next');
+        const currentEl = slider.querySelector('.slider-current');
+
+        if (!track || slides.length === 0 || !currentEl) return;
+
+        const total = slides.length;
+        let index = 0;
+        let busy = false;
+
+        function update() {
+            track.style.transform = `translateX(${-index * 100}%)`;
+            currentEl.textContent = String(index + 1);
+        }
+
+        function setIndex(nextIndex) {
+            if (busy) return;
+            busy = true;
+            index = (nextIndex + total) % total;
+            update();
+            window.setTimeout(() => { busy = false; }, 320);
+        }
+
+        if (prevBtn) {
+            prevBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIndex(index - 1);
+            });
+        }
+
+        if (nextBtn) {
+            nextBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIndex(index + 1);
+            });
+        }
+
+        // Одна стрелка — в одну сторону по свайпу/колесу (лёгкий UX)
+        slider.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (e.deltaY > 0) setIndex(index + 1);
+            else if (e.deltaY < 0) setIndex(index - 1);
+        }, { passive: false });
+
+        update();
+    });
+})();
+
 </script>
 {% endblock %}
 

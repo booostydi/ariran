@@ -1,7 +1,25 @@
-- [ ] Fix NoReverseMatch in admin_panel by adding missing URL patterns for:
-  - [ ] admin_toggle_user
-  - [ ] admin_delete_user
-  - [ ] admin_toggle_studio
-  - [ ] admin_delete_studio
-- [ ] Verify tabs /admin-panel/?tab=users and /admin-panel/?tab=studios render
-- [ ] Restart dev server and re-test flows
+# TODO
+
+## Задача: мини-слайдер в карточке каталога + редирект на страницу студии + стили фильтров/сортировки
+
+### План внедрения
+1. Обновить `studios/templates/studios/catalog.html`
+   - В каждой `.studio-card` заменить одиночное `<img>` на мини-слайдер: `card-slider`, `slider-track`, `slider-slide`.
+   - Добавить dots (кружки) с цветами: неактив `#777`, актив `#788BFF`.
+   - Добавить prev/next кнопки внутри картинки.
+   - Название и изображение должны редиректить на `studios:studio_detail`.
+   - Сохранить корректную работу `favorite-btn` (без редиректа, с `stopPropagation`).
+2. Обновить `studios/static/studios/css/style.css`
+   - Добавить стили мини-слайдера и dots (размеры/положение).
+   - Добавить плавность анимации переключения (`transition`).
+   - Стилизовать сортировку так же, как `filter-select-wrapper` в сайдбаре (добавить wrapper/классы если нужно).
+3. Добавить JS-логику (в `catalog.html` inline или в `studios/static/studios/js/main.js`)
+   - Зацикливание prev/next.
+   - Wheel -> next/prev с защитой от дребезга.
+   - Обновление активного слайда и dots.
+4. Прогнать ручное тестирование:
+   - Каталог: wheel переключает, последний->первый и наоборот.
+   - Клик по картинке/названию ведёт на страницу студии.
+   - Favorite работает без переключения/редиректа.
+   - Сортировка применяет фильтр/сортировку как раньше.
+
