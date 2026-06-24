@@ -515,6 +515,32 @@ a {
     z-index: 2;
 }
 
+/* Контентные фоны для активных категорий */
+.block3 .grid-item .background-img-cat {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    background-image: var(--bg-image);
+}
+
+.block3 .grid-item .background-img-cat {
+    opacity: 1;
+}
+
+
+
+
+
+
+
+
+
+
 .block3 .item-label {
     position: absolute;
     color: #fff;
@@ -530,6 +556,7 @@ a {
 
 .block3 .grid-item:not(.active) .item-label {
     top: 30px;
+
     left: 50%;
     transform: translateX(-50%);
     font-size: 36px;
@@ -716,8 +743,14 @@ a {
 }
 
 .block5 .grid-item.pos-1 .item-label {
-    display: none;
+    /* На активном слайде (pos-1) нужно показывать наименование студии */
+    display: block;
+
+    bottom: 30px;
+    left: 30px;
 }
+
+
 
 .block5 .slider {
     position: absolute;
@@ -1180,6 +1213,94 @@ a {
     color: #788BFF;
 }
 
+/* ===== Footer Modals ===== */
+.modal-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    display: none;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 24px;
+    z-index: 2000;
+}
+
+.modal-overlay.active{
+    display: flex;
+}
+
+.modal{
+    width: 720px;
+    max-width: calc(100vw - 48px);
+    max-height: calc(100vh - 48px);
+    overflow: auto;
+    background: rgba(20,20,20,0.96);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+    color: rgba(255,255,255,0.92);
+    position: relative;
+    padding: 32px 32px 28px;
+}
+
+.modal-body{
+    padding-right: 6px;
+}
+
+.modal-title{
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    letter-spacing: 0.2px;
+}
+
+.modal-content{
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.82);
+}
+
+.modal-content p{ margin: 10px 0 14px; }
+.modal-content h3{ margin: 18px 0 8px; font-size: 18px; font-weight: 700; color: rgba(255,255,255,0.92); }
+.modal-content ul{ margin: 8px 0 16px 18px; }
+.modal-content li{ margin: 6px 0; }
+
+.modal-note{
+    margin-top: 18px;
+    font-size: 14px;
+    color: rgba(255,255,255,0.65);
+}
+
+.modal-close{
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.22);
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.92);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    line-height: 1;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.modal-close:hover{
+    background: rgba(255,255,255,0.10);
+    border-color: rgba(120,139,255,0.55);
+    transform: scale(1.02);
+}
+
+@media (max-width: 720px){
+    .modal{ padding: 26px 18px 18px; }
+    .modal-close{ top: 10px; right: 10px; width: 38px; height: 38px; }
+}
 
 
 

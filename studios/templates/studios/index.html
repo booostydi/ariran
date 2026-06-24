@@ -84,35 +84,43 @@
             <div class="grid-wrapper fade-in fade-in-delay-1">
                 <div class="grid-item active pos-1" data-pos="1">
                     <div class="item-content">
+                        <span class="background-img-cat" data-bg="/media/main-page/studio-cyclorama.png"></span>
                         <span class="item-label">Циклорама</span>
                         <span class="item-number">01</span>
                     </div>
                 </div>
+
                 <div class="grid-item pos-2" data-pos="2">
                     <div class="item-content">
+                        <span class="background-img-cat" data-bg="/media/main-page/studio-interior.png"></span>
                         <span class="item-label">Интерьерная</span>
                         <span class="item-number">02</span>
                     </div>
                 </div>
                 <div class="grid-item pos-3" data-pos="3">
                     <div class="item-content">
+                        <span class="background-img-cat" data-bg="/media/main-page/studio-chromakey.png"></span>
                         <span class="item-label">Хромакей</span>
                         <span class="item-number">03</span>
                     </div>
                 </div>
                 <div class="grid-item pos-4" data-pos="4">
                     <div class="item-content">
+                        <span class="background-img-cat" data-bg="/media/main-page/studio-thematic.png"></span>
                         <span class="item-label">Тематическая</span>
                         <span class="item-number">04</span>
                     </div>
                 </div>
                 <div class="grid-item pos-5" data-pos="5">
                     <div class="item-content">
+                        <span class="background-img-cat" data-bg="/media/main-page/studio-podcast.png"></span>
                         <span class="item-label">Подкаст</span>
                         <span class="item-number">05</span>
                     </div>
                 </div>
+
             </div>
+
 
             <div class="block-footer fade-in fade-in-delay-2">
                 <p>обширный выбор студий под ваши цели</p>
@@ -166,11 +174,11 @@
 
             <div class="grid-wrapper fade-in fade-in-delay-1">
                 {% for studio in popular_studios %}
-                    <div class="grid-item pos-{{ forloop.counter }}" data-pos="{{ forloop.counter }}" style="background-image: url('{% if studio.photos.first %}{{ studio.photos.first.image.url }}{% else %}{% static 'images/empty-image.png' %}{% endif %}');">
+                    <a href="{% url 'studios:studio_detail' studio.pk %}" class="grid-item pos-{{ forloop.counter }}" data-pos="{{ forloop.counter }}" style="background-image: url('{% if studio.photos.first %}{{ studio.photos.first.image.url }}{% else %}{% static 'images/empty-image.png' %}{% endif %}');">
                         <div class="item-content">
                             <span class="item-label">{{ studio.name }}</span>
                         </div>
-                    </div>
+                    </a>
                 {% endfor %}
             </div>
         </div>
@@ -341,6 +349,7 @@
                     <div class="address">ул. Мира 10, Волгоград<br>400066</div>
                 </div>
             </div>
+
             <div class="footer-middle">
                 <div class="footer-social">
                     <a href="#" class="social-link" aria-label="Telegram">
@@ -354,15 +363,19 @@
                     Рабочие часы: <span class="time">10:00 — 22:00</span>
                 </div>
             </div>
+
             <div class="footer-bottom">
                 <div class="footer-copy">© 2025 Ариран. Все права защищены.</div>
                 <div class="footer-legal">
-                    <a href="#">Политика конфиденциальности</a>
-                    <a href="#">Пользовательское соглашение</a>
+                    <a href="#" class="footer-legal-link" data-modal="privacy" aria-haspopup="dialog">Политика конфиденциальности</a>
+                    <a href="#" class="footer-legal-link" data-modal="terms" aria-haspopup="dialog">Пользовательское соглашение</a>
                 </div>
             </div>
         </div>
+
+        {% include 'studios/_footer_modals_only.html' %}
     </footer>
+
 
     <script>
         // Block 2: Cards animation
@@ -392,6 +405,11 @@
 
         // Block 3: Categories animation
         const block3Items = document.querySelectorAll('.block3 .grid-item');
+
+        // Bind image urls to each fixed studio block (data-bg is tied to that block)
+        document.querySelectorAll('.block3 .background-img-cat[data-bg]').forEach(el => {
+            el.style.setProperty('--bg-image', `url(${el.dataset.bg})`);
+        });
 
         block3Items.forEach(item => {
             item.addEventListener('click', () => {

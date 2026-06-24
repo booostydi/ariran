@@ -1,25 +1,8 @@
 # TODO
 
-## Задача: мини-слайдер в карточке каталога + редирект на страницу студии + стили фильтров/сортировки
-
-### План внедрения
-1. Обновить `studios/templates/studios/catalog.html`
-   - В каждой `.studio-card` заменить одиночное `<img>` на мини-слайдер: `card-slider`, `slider-track`, `slider-slide`.
-   - Добавить dots (кружки) с цветами: неактив `#777`, актив `#788BFF`.
-   - Добавить prev/next кнопки внутри картинки.
-   - Название и изображение должны редиректить на `studios:studio_detail`.
-   - Сохранить корректную работу `favorite-btn` (без редиректа, с `stopPropagation`).
-2. Обновить `studios/static/studios/css/style.css`
-   - Добавить стили мини-слайдера и dots (размеры/положение).
-   - Добавить плавность анимации переключения (`transition`).
-   - Стилизовать сортировку так же, как `filter-select-wrapper` в сайдбаре (добавить wrapper/классы если нужно).
-3. Добавить JS-логику (в `catalog.html` inline или в `studios/static/studios/js/main.js`)
-   - Зацикливание prev/next.
-   - Wheel -> next/prev с защитой от дребезга.
-   - Обновление активного слайда и dots.
-4. Прогнать ручное тестирование:
-   - Каталог: wheel переключает, последний->первый и наоборот.
-   - Клик по картинке/названию ведёт на страницу студии.
-   - Favorite работает без переключения/редиректа.
-   - Сортировка применяет фильтр/сортировку как раньше.
+- [ ] Find why footer modals (privacy policy / terms) work on some pages but not on main page.
+- [ ] Identify duplicated footer markup / missing data-modal attributes / missing modal container on the main page.
+- [ ] Fix templates so main page uses the same footer modal HTML as base.html, and footer links have data-modal attributes.
+- [ ] Ensure footer modals JS (studios/static/studios/js/main.js) is loaded on main page.
+- [ ] Verify by running server and clicking both footer links on the main page.
 

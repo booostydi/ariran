@@ -22,7 +22,6 @@
     <!-- Footer -->
     <footer class="footer">
 
-
         <div class="container">
             <div class="footer-top">
                 <div class="footer-logo">АРИРАН</div>
@@ -39,6 +38,7 @@
                     <div class="address">ул. Мира 10, Волгоград<br>400066</div>
                 </div>
             </div>
+
             <div class="footer-middle">
                 <div class="footer-social">
                     <a href="#" class="social-link" aria-label="Telegram">
@@ -52,11 +52,26 @@
                     Рабочие часы: <span class="time">10:00 — 22:00</span>
                 </div>
             </div>
+
             <div class="footer-bottom">
-                <div class="footer-copy">© 2025 Ариран. Все права защищены.</div>
+                <div class="footer-copy">© 2026 Ариран. Все права защищены.</div>
+
                 <div class="footer-legal">
-                    <a href="#">Политика конфиденциальности</a>
-                    <a href="#">Пользовательское соглашение</a>
+                    <a href="#" class="footer-legal-link" data-modal="privacy" aria-haspopup="dialog">Политика конфиденциальности</a>
+                    <a href="#" class="footer-legal-link" data-modal="terms" aria-haspopup="dialog">Пользовательское соглашение</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modals (Privacy/Terms) -->
+        <div class="modal-overlay" id="modal-overlay" aria-hidden="true">
+            <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+                <button type="button" class="modal-close" id="modal-close" aria-label="Закрыть">
+                    <span aria-hidden="true">×</span>
+                </button>
+                <div class="modal-body">
+                    <h2 class="modal-title" id="modal-title"></h2>
+                    <div class="modal-content" id="modal-content"></div>
                 </div>
             </div>
         </div>
@@ -67,3 +82,4 @@
     {% block extra_scripts %}{% endblock %}
 </body>
 </html>
+

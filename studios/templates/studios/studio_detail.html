@@ -936,13 +936,23 @@ window.bookStudio = async function() {
             });
             const data = await response.json();
             if (!data.success) {
-                alert('Ошибка: ' + data.error);
+                // Отображаем ошибку в центре страницы (без alert)
+                const msg = data.error || 'Ошибка';
+                showCenterError(msg);
                 return;
             }
+
+            // Успех: продолжаем обработку дальше (если нужно)
+
         }
-        alert('Бронирование успешно создано!');
-        window.location.href = '/profile/';
+        showSuccessModal({
+            title: 'Заявка на бронирование успешно оформлена!',
+            message: "Посмотреть своё бронирование вы можете в своём профиле",
+            buttonText: 'Перейти в профиль',
+            buttonHref: '/profile/'
+        });
     } catch (error) {
+
         console.error('Error:', error);
         alert('Произошла ошибка при создании бронирования');
     }
@@ -1064,6 +1074,94 @@ function getHoursWord(hours) {
     if (hours === 1) return 'бронь';
     if (hours >= 2 && hours <= 4) return 'брони';
     return 'броней';
+}
+
+function showSuccessModal({ title, message, buttonText, buttonHref }) {
+    let overlay = document.getElementById('centerSuccessOverlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'centerSuccessOverlay';
+        overlay.style.position = 'fixed';
+        overlay.style.inset = '0';
+        overlay.style.background = 'rgba(0,0,0,0.35)';
+        overlay.style.zIndex = '100000';
+        overlay.style.display = 'flex';
+        overlay.style.alignItems = 'center';
+        overlay.style.justifyContent = 'center';
+        overlay.style.padding = '24px';
+        overlay.style.cursor = 'pointer';
+
+        overlay.innerHTML = `
+            <div style="max-width: 640px; width: 100%; background: #ffffff; border-radius: 18px; padding: 22px 24px; box-shadow: 0 18px 50px rgba(0, 0, 0, 0.25); border: 2px solid rgba(120, 139, 255, 0.25); cursor: default;" onclick="event.stopPropagation()">
+                <div style="font-size: 18px; font-weight: 800; color: #1a1a1a; margin-bottom: 10px;">${title || ''}</div>
+                <div id="centerSuccessMessage" style="font-size: 15px; color: #444; line-height: 1.5; margin-bottom: 18px; white-space: pre-wrap;">${message || ''}</div>
+                <div style="display:flex; justify-content:flex-end;">
+                    <a id="centerSuccessBtn" href="${buttonHref || '/profile/'}" style="padding: 12px 22px; background: linear-gradient(135deg, #788BFF 0%, #5a6fd6 100%); color: #fff; text-decoration:none; border:none; border-radius: 50px; font-size: 14px; font-weight: 700; cursor: pointer; display:inline-flex; align-items:center; justify-content:center;">
+                        ${buttonText || 'Перейти'}
+                    </a>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+    }
+
+    const msgEl = document.getElementById('centerSuccessMessage');
+    if (msgEl) msgEl.textContent = message || '';
+
+    const btn = document.getElementById('centerSuccessBtn');
+    if (btn) {
+        btn.textContent = buttonText || 'Перейти';
+        btn.setAttribute('href', buttonHref || '/profile/');
+    }
+
+    // Закрытие по клику на затемнённый фон (кроме внутреннего контейнера)
+    overlay.style.display = 'flex';
+    overlay.onclick = () => {
+        overlay.style.display = 'none';
+    };
+
+    return overlay;
+}
+
+function showCenterError(message) {
+    let overlay = document.getElementById('centerErrorOverlay');
+
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'centerErrorOverlay';
+        overlay.style.position = 'fixed';
+        overlay.style.inset = '0';
+        overlay.style.background = 'rgba(0,0,0,0.35)';
+        overlay.style.zIndex = '100000';
+        overlay.style.display = 'flex';
+        overlay.style.alignItems = 'center';
+        overlay.style.justifyContent = 'center';
+        overlay.style.padding = '24px';
+        overlay.innerHTML = `
+            <div style="max-width: 640px; width: 100%; background: #ffffff; border-radius: 18px; padding: 22px 24px; box-shadow: 0 18px 50px rgba(0, 0, 0, 0.25); border: 2px solid rgba(120, 139, 255, 0.25);">
+                <div style="font-size: 18px; font-weight: 800; color: #1a1a1a; margin-bottom: 10px;">Ошибка</div>
+                <div id="centerErrorMessage" style="font-size: 15px; color: #444; line-height: 1.5; margin-bottom: 18px; white-space: pre-wrap;"></div>
+                <div style="display:flex; justify-content:flex-end;">
+                    <button id="centerErrorOk" type="button" style="padding: 12px 22px; background: linear-gradient(135deg, #788BFF 0%, #5a6fd6 100%); color: #fff; border:none; border-radius: 50px; font-size: 14px; font-weight: 700; cursor: pointer;">
+                        Ок
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+    }
+
+    const msgEl = document.getElementById('centerErrorMessage');
+    if (msgEl) msgEl.textContent = message;
+
+    overlay.style.display = 'flex';
+
+    const okBtn = document.getElementById('centerErrorOk');
+    if (okBtn) {
+        okBtn.onclick = () => {
+            overlay.style.display = 'none';
+        };
+    }
 }
 
 // Инициализация при загрузке

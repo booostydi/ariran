@@ -370,8 +370,16 @@ def catalog(request):
 
 def create_booking(request):
     """Создание бронирования"""
+    # Если пользователь не авторизован — сообщаем об этом явно
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'success': False,
+            'error': 'Для бронирования необходимо пройти регистрацию'
+        })
+
     try:
         data = json.loads(request.body)
+
         
         start_date = datetime.strptime(data['start_date'], '%Y-%m-%d').date()
         end_date = datetime.strptime(data['end_date'], '%Y-%m-%d').date()
