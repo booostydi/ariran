@@ -408,6 +408,8 @@ def create_booking(request):
         
         if 'equipment' in data and data['equipment']:
             booking.equipment.set(data['equipment'])
+        else:
+            booking.equipment.clear()
         
         return JsonResponse({'success': True, 'booking_id': booking.id})
     
@@ -544,7 +546,13 @@ def studio_detail(request, pk):
     """Детальная страница студии"""
     studio = get_object_or_404(Studio, pk=pk)
     photos = studio.photos.all()
+    # Оборудование для выбора будет браться вообще всё (как просили),
+    # поэтому тут equipment не используется для списка.
     equipment = studio.equipment.filter(is_available=True)
+    # Оборудование для доп. опций
+    equipment_categories = EquipmentCategory.objects.all().order_by('name')
+    equipment_list = Equipment.objects.filter(is_available=True).select_related('category').order_by('category__name','name')
+
     # Отзывы/предоплаты удалены из проекта
     reviews = []
 
@@ -587,6 +595,8 @@ def studio_detail(request, pk):
         'studio': studio,
         'photos': photos,
         'equipment': equipment,
+        'equipment_categories': equipment_categories,
+        'equipment_list': equipment_list,
         'reviews': reviews,
         'days': days,
         'hours': hours,

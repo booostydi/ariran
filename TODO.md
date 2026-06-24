@@ -1,8 +1,8 @@
 # TODO
 
-- [ ] Find why footer modals (privacy policy / terms) work on some pages but not on main page.
-- [ ] Identify duplicated footer markup / missing data-modal attributes / missing modal container on the main page.
-- [ ] Fix templates so main page uses the same footer modal HTML as base.html, and footer links have data-modal attributes.
-- [ ] Ensure footer modals JS (studios/static/studios/js/main.js) is loaded on main page.
-- [ ] Verify by running server and clicking both footer links on the main page.
+- [ ] Перенести стили для блока “Дополнительные опции” из inline `<style>` в `studio_detail.html` в `studios/static/studios/css/style.css`.
+- [ ] Привести стили панели/категорий/чекбоксов к палитре проекта (`#788BFF`, радиусы 14–16px, фоны `#fff/#f7f8fc`).
+- [x] Удалить дублирующие стили из `studio_detail.html`, оставив только остальное специфичное для страницы (если нужно).
+
+- [ ] Проверить отображение: раскрытие меню, аккордеон категорий, чекбоксы, состояние “Нет оборудования”.
 

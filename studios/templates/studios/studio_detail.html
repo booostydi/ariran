@@ -487,29 +487,8 @@ body {
     animation: slideInFromRight 0.3s ease;
 }
 
-/* Дополнительные опции */
-.additional-options {
-    background: #f7f8fc;
-    border-radius: 14px;
-    padding: 16px 20px;
-    cursor: pointer;
-    transition: all 0.2s;
-    border: 2px solid rgba(120, 139, 255, 0.1);
-}
+/* Дополнительные опции вынесены в общий style.css (studios/static/studios/css/style.css) */
 
-.additional-options:hover {
-    background: #f0f1f5;
-    border-color: rgba(120, 139, 255, 0.2);
-}
-
-.options-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 15px;
-    font-weight: 600;
-    color: #1a1a1a;
-}
 
 /* Итого */
 .booking-summary {
@@ -756,7 +735,7 @@ body {
                 <div class="calendar-grid" id="bookingCalendar"></div>
             </div>
 
-            <div class="additional-options" onclick="toggleOptions()">
+            <div class="additional-options" onclick="toggleOptions()" role="button" tabindex="0" aria-expanded="false">
                 <div class="options-header">
                     <span>Дополнительные опции:</span>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -764,6 +743,42 @@ body {
                     </svg>
                 </div>
             </div>
+
+            <div id="equipmentOptionsPanel" class="equipment-options-panel" style="display:none;">
+                <div class="equipment-options-inner">
+                    {% if equipment_categories.count == 0 %}
+                        <div class="equipment-empty">Нет оборудования</div>
+                    {% else %}
+                        {% for cat in equipment_categories %}
+                            <div class="equipment-category">
+                                <button type="button" class="equipment-category-toggle" onclick="toggleEquipmentCategory(this)" aria-expanded="false">
+                                    <span class="equipment-category-name">{{ cat.name }}</span>
+                                    <span class="equipment-category-arrow">›</span>
+                                </button>
+                                <div class="equipment-items" style="display:none;">
+                                    {% for eq in equipment_list %}
+                                        {% if eq.category_id == cat.id %}
+                                            <label class="equipment-item">
+                                                <input type="checkbox" class="equipment-checkbox" value="{{ eq.id }}" onchange="onEquipmentSelectionChange()">
+                                                <span class="equipment-checkmark"></span>
+                                                <span class="equipment-item-name">{{ eq.name }}</span>
+                                            </label>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+<script>
+// оборудование для модалки/summary
+window.equipmentIdToName = window.equipmentIdToName || {};
+{% for eq in equipment_list %}
+    window.equipmentIdToName[{{ eq.id }}] = "{{ eq.name|escapejs }}";
+{% endfor %}
+</script>
 
             <div class="booking-summary">
                 <div class="summary-left">
@@ -889,8 +904,61 @@ window.selectTimeSlot = function(element) {
 };
 
 window.toggleOptions = function() {
-    alert('Функционал дополнительных опций будет добавлен позже');
+    const panel = document.getElementById('equipmentOptionsPanel');
+    if (!panel) return;
+
+    const isHidden = panel.style.display === 'none';
+    panel.style.display = isHidden ? 'block' : 'none';
+
+    const expanded = isHidden;
+    const header = document.querySelector('.additional-options');
+    if (header) {
+        header.setAttribute('aria-expanded', String(expanded));
+    }
 };
+
+window.toggleEquipmentCategory = function(btn) {
+    const items = btn.parentElement.querySelector('.equipment-items');
+    if (!items) return;
+
+    const isHidden = items.style.display === 'none' || items.style.display === '';
+    items.style.display = isHidden ? 'block' : 'none';
+
+    btn.setAttribute('aria-expanded', String(isHidden));
+};
+
+let selectedEquipmentIds = new Set();
+window.onEquipmentSelectionChange = function() {
+    const checked = document.querySelectorAll('.equipment-checkbox:checked');
+    selectedEquipmentIds = new Set(Array.from(checked).map(i => parseInt(i.value)));
+
+    updateBookingSummaryEquipment();
+};
+
+function updateBookingSummaryEquipment() {
+    const detailsEl = document.getElementById('bookingDetails');
+    if (!detailsEl) return;
+
+    // базовый текст уже обновляется updateBookingSummary() при выборе времени
+    // поэтому добавляем строкой ниже выбранное оборудование, если оно выбрано.
+    const timeDetails = detailsEl.textContent || '';
+
+    // чтобы не дублировать, вытащим часть после "Оборудование:" (если есть)
+    const parts = timeDetails.split('\nОборудование:');
+    const baseText = parts[0];
+
+    if (selectedEquipmentIds.size === 0) {
+        detailsEl.textContent = baseText;
+        return;
+    }
+
+    const names = Array.from(selectedEquipmentIds)
+        .map(id => window.equipmentIdToName[id])
+        .filter(Boolean);
+
+    detailsEl.textContent = baseText + '\nОборудование: ' + names.join(', ');
+}
+
 
 window.bookStudio = async function() {
     if (selectedSlots.length === 0) {
@@ -931,7 +999,7 @@ window.bookStudio = async function() {
                     start_time: formatHour(range.startHour),
                     end_date: range.endDate,
                     end_time: range.endHourExclusive,
-                    equipment: []
+        equipment: Array.from(selectedEquipmentIds)
                 })
             });
             const data = await response.json();
@@ -945,9 +1013,14 @@ window.bookStudio = async function() {
             // Успех: продолжаем обработку дальше (если нужно)
 
         }
+const equipmentNames = Array.from(selectedEquipmentIds)
+            .map(id => window.equipmentIdToName[id])
+            .filter(Boolean);
+
         showSuccessModal({
             title: 'Заявка на бронирование успешно оформлена!',
-            message: "Посмотреть своё бронирование вы можете в своём профиле",
+            message: "Посмотреть своё бронирование вы можете в своём профиле" +
+                (equipmentNames.length ? "\nОборудование: " + equipmentNames.join(', ') : ''),
             buttonText: 'Перейти в профиль',
             buttonHref: '/profile/'
         });

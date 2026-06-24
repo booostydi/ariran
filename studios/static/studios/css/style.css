@@ -1680,6 +1680,201 @@ a {
     background: #5a74f5;
 }
 
+/* ===== Дополнительные опции (studio_detail) ===== */
+
+.additional-options {
+    background: #f7f8fc;
+    border-radius: 14px;
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid rgba(120, 139, 255, 0.20);
+}
+
+.additional-options:hover {
+    background: #f0f1f5;
+    border-color: rgba(120, 139, 255, 0.35);
+}
+
+.options-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1a1a;
+    gap: 12px;
+}
+
+/* Панель дополнительных опций (оборудование) */
+#equipmentOptionsPanel.equipment-options-panel {
+    margin-top: 12px;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 14px;
+    border: 1px solid rgba(120, 139, 255, 0.18);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+    overflow: hidden;
+}
+
+.equipment-options-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.equipment-empty {
+    font-size: 14px;
+    color: #888;
+    padding: 14px 8px;
+    text-align: center;
+    background: #f7f8fc;
+    border: 1px dashed rgba(120, 139, 255, 0.30);
+    border-radius: 14px;
+}
+
+.equipment-category {
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.06);
+    background: #fff;
+}
+
+.equipment-category-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+    padding: 12px 14px;
+
+    background: linear-gradient(135deg, rgba(120,139,255,0.10) 0%, rgba(120,139,255,0.03) 100%);
+    border: none;
+    transition: background 0.2s ease;
+}
+
+.equipment-category-toggle:hover {
+    background: linear-gradient(135deg, rgba(120,139,255,0.14) 0%, rgba(120,139,255,0.05) 100%);
+}
+
+.equipment-category-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1a1a1a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.equipment-category-arrow {
+    font-size: 18px;
+    font-weight: 700;
+    color: #788BFF;
+    transition: transform 0.2s ease;
+    transform: translateY(-1px);
+}
+
+.equipment-category-toggle[aria-expanded="true"] .equipment-category-arrow {
+    transform: rotate(90deg) translateY(-1px);
+}
+
+.equipment-items {
+    padding: 10px 14px 14px;
+    border-top: 1px solid rgba(0,0,0,0.06);
+    background: #f7f8fc;
+}
+
+.equipment-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    user-select: none;
+}
+
+.equipment-item:hover {
+    background: rgba(120,139,255,0.10);
+}
+
+.equipment-checkbox {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.equipment-item-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+/* кастомный визуальный чекбокс: отдельный квадрат для чекмарка */
+.equipment-checkmark {
+    width: 18px;
+    height: 18px;
+    border-radius: 6px;
+    border: 2px solid rgba(120,139,255,0.35);
+    background: #fff;
+    flex-shrink: 0;
+    position: relative; /* важно! */
+    transition: background 0.15s, border-color 0.15s;
+}
+
+/* галочка — внутри того же span */
+.equipment-checkmark::after {
+    content: '✓';
+    color: #fff;
+    font-size: 13px;
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.equipment-checkbox:checked ~ .equipment-checkmark {
+    background: #788BFF;
+    border-color: #788BFF;
+}
+
+.equipment-checkbox:checked ~ .equipment-checkmark::after {
+    opacity: 1;
+}
+
+/* Текст чекбокса */
+.equipment-item-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    line-height: 1;
+    position: relative;
+}
+
+.equipment-checkbox:checked ~ .equipment-item-name {
+    color: #1a1a1a;
+}
+
+
+@media (max-width: 1024px) {
+    #equipmentOptionsPanel.equipment-options-panel {
+        padding: 12px;
+    }
+
+    .equipment-items {
+        padding: 10px 12px 12px;
+    }
+
+    .additional-options {
+        padding: 14px 16px;
+    }
+}
+
 /* ===== TOP NAVIGATION ===== */
 .nav-menu{
     position: fixed;
